@@ -1,0 +1,63 @@
+{
+  "name": "article-build",
+  "productName": "Article Build",
+  "version": "1.0.0",
+  "description": "My Electron application description",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\"",
+    "dev": "npx tailwindcss -i ./src/input.css -o ./src/css/style.css --watch",
+    "build": "npx electron-builder build"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Alsav System"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "puppeteer": "^21.6.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.4.2",
+    "@electron-forge/maker-deb": "^6.4.2",
+    "@electron-forge/maker-rpm": "^6.4.2",
+    "@electron-forge/maker-squirrel": "^6.4.2",
+    "@electron-forge/maker-zip": "^6.4.2",
+    "@electron-forge/plugin-auto-unpack-natives": "^6.4.2",
+    "electron": "27.0.0",
+    "electron-builder": "^24.6.4",
+    "electron-updater": "^6.1.7",
+    "tailwindcss": "^3.4.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NirwMukti/bot-electronWP"
+  },
+  "build": {
+    "appId": "Article Build",
+    "productName": "Article Build",
+    "compression": "maximum",
+    "copyright": "Copyright © 2023 Alsav System",
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "icon": "src/assets/logo.png",
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  }
+}
