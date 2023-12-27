@@ -1,7 +1,7 @@
 {
   "name": "article-build",
   "productName": "Article Build",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "My Electron application description",
   "main": "src/index.js",
   "scripts": {
@@ -11,7 +11,8 @@
     "publish": "electron-forge publish",
     "lint": "echo \"No linting configured\"",
     "dev": "npx tailwindcss -i ./src/input.css -o ./src/css/style.css --watch",
-    "build": "npx electron-builder build"
+    "build": "npx electron-builder build",
+    "deploy": "electron-builder -p always"
   },
   "keywords": [],
   "author": {
@@ -40,13 +41,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/NirwMukti/bot-electronWP"
+    "url": "https://github.com/SattyaP/prod-wp"
   },
   "build": {
     "appId": "Article Build",
     "productName": "Article Build",
     "compression": "maximum",
     "copyright": "Copyright © 2023 Alsav System",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "SattyaP",
+        "repo": "prod-wp",
+        "private": true
+      }
+    ],
     "win": {
       "target": [
         "nsis"
