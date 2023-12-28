@@ -97,8 +97,8 @@ ipcMain.on('stop', (event) => {
     event.sender.send('log', logs.join('\n'));
   };
 
-  event.sender.send("force");
   stopProccess(logToTextarea);
+  event.sender.send("force");
 });
 
 ipcMain.on('app_version', (event) => {

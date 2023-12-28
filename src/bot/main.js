@@ -269,11 +269,13 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await tagsWP.type(tagsField)
 
         await delay(3)
-
+        
         logToTextArea('[INFO] Click Add Tags Button')
-        const addTags = await page2.$('#post_tag > div > div.ajaxtag.hide-if-no-js > input.button.tagadd')
-        await addTags.click()
-
+        await page2.waitForSelector('#post_tag > div > div.ajaxtag.hide-if-no-js > input.button.tagadd')
+        await page2.evaluate(() => {
+            document.querySelector("#post_tag > div > div.ajaxtag.hide-if-no-js > input.button.tagadd").click()
+        })
+        
         await delay(5)
 
         logToTextArea('[INFO] Click Save Post Button')
@@ -355,30 +357,36 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         }
     }
 
-    const workFlow = async (stops) => {
+    const workFlow = async () => {
         try {
             const files = fs.readFileSync(data.files, 'utf-8').split('\n')
-
+    
             for (let i = 0; i < files.length; i++) {
+                if (stops) {
+                    logToTextArea("Stop Proccess wait until this proccess is done")
+                    break;
+                }
                 let keyword = files[i].trim();
                 logToTextArea(`Article Process ${i + 1}`)
                 await coreProccess(keyword)
                 const countProggress = parseInt(((i + 1) / files.length) * 100)
                 proggress(countProggress)
+                
                 if (stops) {
+                    logToTextArea("Stop Proccess is done")
                     break;
                 }
             }
-
+    
             await browser.close()
         } catch (error) {
             logToTextArea(error)
             await browser.close()
         }
     }
-
+    
     await loadCookies()
-    await workFlow(stops)
+    await workFlow()
 }
 
 const stopProccess = async () => {

@@ -1,24 +1,24 @@
 const {
     ipcRenderer
 } = require("electron");
+const showLogCheckbox = document.querySelector('#show');
+const boxLog = document.getElementById('fieldLog')
+const logTextarea = document.getElementById('log')
+const progs = document.getElementById('prog')
+const files = document.getElementById('txt');
+const cookies = document.getElementById('json');
+const visibleToggle = document.getElementById('visible')
+const dom = document.getElementById('domain');
+const start = document.getElementById('start');
+const stop = document.getElementById('stop');
+const version = document.getElementById('version')
+const warp = document.getElementById('warp');
+const message = document.getElementById('message');
+const restartButton = document.getElementById('restart-button');
+const loaderDownload = document.getElementById('warp-loader')
 
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('head').style.webkitAppRegion = 'drag'
-    const showLogCheckbox = document.querySelector('#show');
-    const boxLog = document.getElementById('fieldLog')
-    const logTextarea = document.getElementById('log')
-    const progs = document.getElementById('prog')
-    const files = document.getElementById('txt');
-    const cookies = document.getElementById('json');
-    const visibleToggle = document.getElementById('visible')
-    const dom = document.getElementById('domain');
-    const start = document.getElementById('start');
-    const stop = document.getElementById('stop');
-    const version = document.getElementById('version')
-    const warp = document.getElementById('warp');
-    const message = document.getElementById('message');
-    const restartButton = document.getElementById('restart-button');
-    const loaderDownload = document.getElementById('warp-loader')
 
     showLogCheckbox.addEventListener('change', function () {
         if (showLogCheckbox.checked) {
@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', function () {
             boxLog.classList.add('hidden')
         }
     });
-
 
     document.addEventListener('change', function () {
         const files = document.getElementById('txt').files[0]?.path;
@@ -123,9 +122,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     stop.addEventListener('click', () => {
         if (confirm("Realy want to stop the proccess ?") == true) {
-            ipcRenderer.send('stop');
             start.classList.remove("hidden")
             stop.classList.add("hidden")
+            ipcRenderer.send('stop');
         }
     });
 });
