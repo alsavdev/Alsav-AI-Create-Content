@@ -64,11 +64,11 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         })
 
         logToTextArea(`[INFO] Create a Title About ${keyword} in ChatGPT`)
-        
+
         // write chtgpt
         await sendChat(keyword, 1)
 
-        const articleTitle = await extractText(true)
+        let articleTitle = await extractText(true)
 
         logToTextArea('[INFO] Enter the Wordpress Page')
         const targetWordpress = `https://${data.dom}/wp-admin/post-new.php`
@@ -200,14 +200,10 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         logToTextArea('[INFO] Remove Site Title and Separator in Wordpress Post Title')
         await page2.waitForSelector('#aioseo-post-settings-post-title-row > div.aioseo-col.col-xs-12.col-md-9.text-xs-left > div > div.aioseo-html-tags-editor > div.aioseo-editor > div.aioseo-editor-single.ql-container.ql-snow > div.ql-editor > p')
-        const clearPostTitle = await page2.$('#aioseo-post-settings-post-title-row > div.aioseo-col.col-xs-12.col-md-9.text-xs-left > div > div.aioseo-html-tags-editor > div.aioseo-editor > div.aioseo-editor-single.ql-container.ql-snow > div.ql-editor > p')
-        await clearPostTitle.click()
 
-        await delay(2);
-
-        for (let i = 0; i < 4; i++) {
-            await page2.keyboard.press('Backspace')
-        }
+        await page2.evaluate((articleTitle) => {
+            document.querySelector('#aioseo-post-settings-post-title-row > div.aioseo-col.col-xs-12.col-md-9.text-xs-left > div > div.aioseo-html-tags-editor > div.aioseo-editor > div.aioseo-editor-single.ql-container.ql-snow > div.ql-editor > p').innerHTML = articleTitle
+        }, articleTitle)
 
         await delay(2)
 
@@ -227,7 +223,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await page.bringToFront()
 
         logToTextArea('[INFO] Create a Meta Description in ChatGPT')
-        
+
         // write chtgpt
         await sendChat(keyword, 3)
 
@@ -269,13 +265,13 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await tagsWP.type(tagsField)
 
         await delay(3)
-        
+
         logToTextArea('[INFO] Click Add Tags Button')
         await page2.waitForSelector('#post_tag > div > div.ajaxtag.hide-if-no-js > input.button.tagadd')
         await page2.evaluate(() => {
             document.querySelector("#post_tag > div > div.ajaxtag.hide-if-no-js > input.button.tagadd").click()
         })
-        
+
         await delay(5)
 
         logToTextArea('[INFO] Click Save Post Button')
@@ -307,7 +303,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
             await delay(2)
 
-            await page.click('button[data-testid="send-button"]')            
+            await page.click('button[data-testid="send-button"]')
 
             try {
                 await page.waitForSelector('button[data-testid="send-button"]', {
@@ -317,7 +313,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 await checkLimit(await extractText(true))
             }
 
-            await delay (3)
+            await delay(3)
         } catch (error) {
             throw error;
         }
@@ -345,6 +341,8 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 return article;
             }, last, notOuter);
         }
+
+        article = article.map(str => str.replace(/^"|"$/g, ''));
         return article;
     };
 
@@ -360,7 +358,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
     const workFlow = async () => {
         try {
             const files = fs.readFileSync(data.files, 'utf-8').split('\n')
-    
+
             for (let i = 0; i < files.length; i++) {
                 if (stops) {
                     logToTextArea("Stop Proccess wait until this proccess is done")
@@ -371,20 +369,20 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 await coreProccess(keyword)
                 const countProggress = parseInt(((i + 1) / files.length) * 100)
                 proggress(countProggress)
-                
+
                 if (stops) {
                     logToTextArea("Stop Proccess is done")
                     break;
                 }
             }
-    
+
             await browser.close()
         } catch (error) {
             logToTextArea(error)
             await browser.close()
         }
     }
-    
+
     await loadCookies()
     await workFlow()
 }
