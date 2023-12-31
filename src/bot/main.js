@@ -361,7 +361,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
             for (let i = 0; i < files.length; i++) {
                 if (stops) {
-                    logToTextArea("Stop Proccess wait until this proccess is done")
+                    logToTextArea("Stop Proccess is done")
                     break;
                 }
                 let keyword = files[i].trim();
