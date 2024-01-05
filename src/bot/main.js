@@ -347,10 +347,17 @@ const mainProccess = async (logToTextArea, proggress, data) => {
     };
 
     const checkLimit = async (dataArticle) => {
-        if (dataArticle.includes("You've reached our limit of messages per hour. Please try again later.") || dataArticle.includes('Something went wrong. If this issue persists please contact us through our help center at help.openai.com.') || dataArticle.includes('An error occurred. Either the engine you requested does not exist or there was another issue processing your request. If this issue persists please contact us through our help center at help.openai.com.') || dataArticle.includes('Conversation not found')) {
+        if (dataArticle.includes('Something went wrong. If this issue persists please contact us through our help center at help.openai.com.') || dataArticle.includes('An error occurred. Either the engine you requested does not exist or there was another issue processing your request. If this issue persists please contact us through our help center at help.openai.com.') || dataArticle.includes('Conversation not found')) {
             stops = true
             logToTextArea("Limit Reached Close And Stop proccess")
             await browser.close()
+            return;
+        } else if (dataArticle.includes("You've reached our limit of messages per hour. Please try again later.")) {
+            logToTextArea("Limit Reached Wait 30mnt")
+            await delay(1800000)
+            logToTextArea("Ready after 30mnt")
+            const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.bg-black.pt-3\\.5 > div > a')
+            await newChat.evaluate(e => e.click())
             return;
         }
     }
@@ -367,8 +374,12 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 let keyword = files[i].trim();
                 logToTextArea(`Article Process ${i + 1}`)
                 await coreProccess(keyword)
+
                 const countProggress = parseInt(((i + 1) / files.length) * 100)
                 proggress(countProggress)
+
+                // remove each data after proccess
+                files[i] = files[i].replace(keyword, '').trim();
 
                 if (stops) {
                     logToTextArea("Stop Proccess is done")
