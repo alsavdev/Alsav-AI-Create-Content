@@ -1,7 +1,5 @@
 const puppeteer = require('puppeteer-extra');
-const {
-    executablePath
-} = require('puppeteer')
+const { executablePath } = require('puppeteer')
 const stealthPlugin = require('puppeteer-extra-plugin-stealth')
 puppeteer.use(stealthPlugin())
 const fs = require('fs');
@@ -28,7 +26,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await new Promise(resolve => setTimeout(resolve, seconds * 1000));
     }
 
-    const loadCookies = async () => {
+    const loadCookiesGPT = async () => {
         try {
             logToTextArea('[INFO] Load Cookies')
 
@@ -42,7 +40,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
             await page.setCookie(...cookies)
 
-            await delay(10)
+            await delay(3)
 
             //Refresh the page to apply the cookies
             await page.goto(baseURL, {
@@ -51,6 +49,27 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             })
 
             logToTextArea('[INFO] Done Load Cookies\n')
+        } catch (error) {
+            logToTextArea(error)
+            throw error
+        }
+    }
+
+    const loadCookiesWP = async (page) => {
+        try {
+            logToTextArea('[INFO] Load Cookies Wordpress')
+
+            const cookiesData = fs.readFileSync(data.cookiesWp, 'utf8')
+            const cookies = JSON.parse(cookiesData)
+
+            await page.setCookie(...cookies)
+
+            await page.goto(`https://${data.dom}/wp-admin/post-new.php`, {
+                waitUntil: ['domcontentloaded', 'networkidle2'],
+                timeout: 120000,
+            })
+
+            logToTextArea('[INFO] Done Load Cookies WordPress\n')
         } catch (error) {
             logToTextArea(error)
             throw error
@@ -71,12 +90,9 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         let articleTitle = await extractText(true)
 
         logToTextArea('[INFO] Enter the Wordpress Page')
-        const targetWordpress = `https://${data.dom}/wp-admin/post-new.php`
         const page2 = await browser.newPage()
-        await page2.goto(targetWordpress, {
-            waitUntil: ['domcontentloaded', 'networkidle2'],
-            timeout: 120000,
-        })
+
+        await loadCookiesWP(page2)
 
         await delay(2)
 
@@ -353,48 +369,55 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             await browser.close()
             return;
         } else if (dataArticle.includes("You've reached our limit of messages per hour. Please try again later.")) {
-            logToTextArea("Limit Reached Wait 30mnt")
-            await delay(1800000)
-            logToTextArea("Ready after 30mnt")
+            logToTextArea(`Limit Reached Wait ${data.times} mnt`)
+            await new Promise(resolve => setTimeout(resolve, data.times * 60 * 1000));
+            logToTextArea(`Ready after ${data.times} mnt Initiate new chat`)
             const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.bg-black.pt-3\\.5 > div > a')
             await newChat.evaluate(e => e.click())
             return;
         }
     }
 
+    const fs = require("fs");
+
     const workFlow = async () => {
         try {
-            const files = fs.readFileSync(data.files, 'utf-8').split('\n')
+            const files = fs.readFileSync(data.files, 'utf-8');
+            const lines = files.split('\n');
 
-            for (let i = 0; i < files.length; i++) {
+            for (let i = 0; i < lines.length; i++) {
                 if (stops) {
-                    logToTextArea("Stop Proccess is done")
+                    logToTextArea("Stop Process is done");
                     break;
                 }
-                let keyword = files[i].trim();
-                logToTextArea(`Article Process ${i + 1}`)
-                await coreProccess(keyword)
 
-                const countProggress = parseInt(((i + 1) / files.length) * 100)
-                proggress(countProggress)
+                let keyword = lines[i].trim();
+                logToTextArea(`Article Process ${i + 1}`);
+                await coreProccess(keyword);
 
-                // remove each data after proccess
-                files[i] = files[i].replace(keyword, '').trim();
+                const countProgress = parseInt(((i + 1) / lines.length) * 100);
+                proggress(countProgress);
+
+                lines.splice(i, 1);
+                i--;
+
+                const modifiedData = lines.join('\n');
+                fs.writeFileSync(data.files, modifiedData, 'utf-8');
 
                 if (stops) {
-                    logToTextArea("Stop Proccess is done")
+                    logToTextArea("Stop Process is done");
                     break;
                 }
             }
 
-            await browser.close()
+            await browser.close();
         } catch (error) {
-            logToTextArea(error)
-            await browser.close()
+            logToTextArea(error);
+            await browser.close();
         }
     }
 
-    await loadCookies()
+    await loadCookiesGPT()
     await workFlow()
 }
 
