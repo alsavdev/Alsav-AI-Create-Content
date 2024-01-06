@@ -5,23 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="css/style.css" rel="stylesheet">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
-
-    body {
-      font-family: 'Rubik', sans-serif;
-    }
-
-    input[type=file]::file-selector-button {
-      border: transparent;
-      padding: 0px 14px;
-      height: 41px;
-      border-radius: .2em;
-      background-color: #F3EAEA;
-      ;
-      transition: 1s;
-    }
-  </style>
 </head>
 
 <body class="bg-[#124F6A] text-white h-screen">
@@ -44,33 +27,52 @@
 
   <div class="maincontent">
     <div id="head" class="min-[300px]:ps-[31px] z-50 top-0 sticky sm:ps-[71px] h-[99px] bg-white ps-[71px] flex">
-      <p class="text-black text-[34px] font-bold my-auto">Article Build <span id="version" class="text-black ml-3 text-sm"></span></p>
+      <p class="text-black text-[34px] font-bold my-auto">Article Build <span id="version"
+          class="text-black ml-3 text-sm"></span></p>
     </div>
     <form id="myForm">
       <div
         class="py-[20px] px-[172px] min-[300px]:px-[25px] sm:px-[50px] md:px-[100px] h-full gap-3 lg:gap-[57px] flex flex-col lg:flex-row justify-center">
         <div class="flex flex-col gap-[10px] w-full basis-full lg:basis-1/2">
-          <div class="w-full flex flex-col">
-            <p class="text-[17px] font-normal"> Domain Name </p>
-            <input type="text"
-              class="text-[#000] text-[12px] font-light h-[41px] px-[14px] py-[2px] rounded-md outline-none"
-              placeholder="ex: google.com" id="domain" required>
+          <div class="w-full flex flex-col gap-2">
+            <div class="w-full">
+              <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="domain">
+                Domain Name</label>
+              <input type="text"
+                class="text-[#000] w-full text-[12px] h-[43px] px-[14px] py-[2px] rounded-md outline-none"
+                placeholder="ex: google.com" id="domain" required>
+            </div>
+          </div>
+
+          <div class="w-full flex flex-col sm:flex-row gap-2">
+            <div class="w-full">
+              <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="json">Input File
+                Cookies ChatGPT</label>
+              <input id="json"
+                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
+               accept=".json" type="file" required>
+            </div>
+            <div class="w-full">
+              <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="times">Times New Chat ( minutes )</label>
+              <input type="number"
+                class="text-[#000] w-full text-[12px] h-[43px] px-[14px] py-[2px] rounded-md outline-none"
+                placeholder="3000" value="30" id="times">
+            </div>
           </div>
           <div class="frame-bot flex flex-col  sm:flex-row gap-2 ">
             <div class="w-full">
-              <label class="block mb-2 text-sm font-medium text-white dark:text-white" for=" user_avatar">Input File Keyword</label>
+              <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="txt">Input File Keyword</label>
               <input id="txt"
                 class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
-                aria-describedby="user_avatar_help" id="user_avatar" accept=".txt" type="file" required>
+               accept=".txt" type="file" required>
             </div>
             <div class="w-full">
-              <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="user_avatar">Input
-                File Cookies</label>
-              <input id="json"
+              <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="wp">Input
+                File Cookies WordPress</label>
+              <input id="wp"
                 class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
-                aria-describedby="user_avatar_help" id="user_avatar" accept=".json" type="file" required>
+               accept=".json" type="file" required>
             </div>
-
           </div>
           <!-- <div class="loading h-[14px] rounded-md w-auto bg-white"></div> -->
 

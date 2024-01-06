@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+
+input[type=file]::file-selector-button {
+    border: transparent;
+    padding: 0px 14px;
+    height: 41px;
+    border-radius: .2em;
+    background-color: #F3EAEA;
+    transition: 1s;
+}
+
 * {
     -webkit-user-select: none;
 }
@@ -13,6 +24,7 @@ body::-webkit-scrollbar {
 body {
     -ms-overflow-style: none;
     scrollbar-width: none;
+    font-family: 'Rubik', sans-serif;
 }
 
 .overlay {

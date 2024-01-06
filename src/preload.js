@@ -7,6 +7,8 @@ const logTextarea = document.getElementById('log')
 const progs = document.getElementById('prog')
 const files = document.getElementById('txt');
 const cookies = document.getElementById('json');
+const cookiesWp = document.getElementById('wp');
+const times = document.getElementById('times');
 const visibleToggle = document.getElementById('visible')
 const dom = document.getElementById('domain');
 const start = document.getElementById('start');
@@ -33,9 +35,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const files = document.getElementById('txt').files[0]?.path;
         const cookies = document.getElementById('json').files[0]?.path;
         const dom = document.getElementById('domain').value;
+        const cookiesWp = document.getElementById('wp').files[0]?.path;
         if (dom == null || dom == "") {
             start.setAttribute('disabled', true);
-        } else if (files != "" && cookies != null && dom != null) {
+        } else if (files != "" && cookies != null && dom != null && cookiesWp != null) {
             start.removeAttribute('disabled');
         }
     })
@@ -45,29 +48,28 @@ document.addEventListener('DOMContentLoaded', function () {
             files: files.files[0]?.path,
             cookies: cookies.files[0]?.path,
             dom: dom.value,
-            visible: visibleToggle.checked ? false : 'new'
+            visible: visibleToggle.checked ? false : 'new',
+            cookiesWp: cookiesWp.files[0]?.path,
+            times : times.value
         }
+
         progs.innerText = '0%'
         progs.style.width = '0%'
         ipcRenderer.send('main', data)
     })
 
+    const allElement = [dom, files, cookies, visibleToggle, cookiesWp, times]
+
     ipcRenderer.on('run', () => {
         start.classList.add('hidden')
         stop.classList.remove('hidden')
-        dom.disabled = true
-        files.disabled = true
-        cookies.disabled = true
-        visibleToggle.disabled = true
+        allElement.forEach(e => e.disabled = true)
     })
-
+    
     ipcRenderer.on('force', () => {
         start.classList.remove('hidden')
         stop.classList.add('hidden')
-        dom.disabled = false
-        files.disabled = false
-        cookies.disabled = false
-        visibleToggle.disabled = false
+        allElement.forEach(e => e.disabled = false)
     })
 
     ipcRenderer.on('log', (event, logs) => {
