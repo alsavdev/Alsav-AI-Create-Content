@@ -326,7 +326,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     timeout: 120000
                 })
             } catch (error) {
-                await checkLimit(await extractText(true))
+                await checkLimit(await extractText(true), key)
             }
 
             await delay(3)
@@ -362,10 +362,10 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         return article;
     };
 
-    const checkLimit = async (dataArticle) => {
-        if (dataArticle.includes('Something went wrong. If this issue persists please contact us through our help center at help.openai.com.') || dataArticle.includes('An error occurred. Either the engine you requested does not exist or there was another issue processing your request. If this issue persists please contact us through our help center at help.openai.com.') || dataArticle.includes('Conversation not found')) {
+    const checkLimit = async (dataArticle, key) => {
+        if (dataArticle.includes('An error occurred. Either the engine you requested does not exist or there was another issue processing your request. If this issue persists please contact us through our help center at help.openai.com.') || dataArticle.includes('Conversation not found')) {
             stops = true
-            logToTextArea("Limit Reached Close And Stop proccess")
+            logToTextArea("[ERROR] Something error with chatGPT")
             await browser.close()
             return;
         } else if (dataArticle.includes("You've reached our limit of messages per hour. Please try again later.")) {
@@ -375,10 +375,14 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.bg-black.pt-3\\.5 > div > a')
             await newChat.evaluate(e => e.click())
             return;
+        } else if (dataArticle.includes('Something went wrong. If this issue persists please contact us through our help center at help.openai.com.')) {
+            logToTextArea('[ERROR] Found error Initiate New Chat !')
+            await delay(10)
+            const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.bg-black.pt-3\\.5 > div > a')
+            await newChat.evaluate(e => e.click())
+            await sendChat(keyword, key)
         }
     }
-
-    const fs = require("fs");
 
     const workFlow = async () => {
         try {
