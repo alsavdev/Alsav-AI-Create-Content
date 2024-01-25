@@ -2,11 +2,19 @@ const {
   app,
   BrowserWindow,
   ipcMain,
-  Menu
+  Menu,
+  dialog
 } = require('electron');
 const path = require('path');
-const { mainProccess, stopProccess } = require('./bot/main');
-const { autoUpdater } = require('electron-updater');
+const {
+  mainProccess,
+  stopProccess,
+  link
+} = require('./bot/main');
+const {
+  autoUpdater
+} = require('electron-updater');
+const fs = require('fs')
 
 if (require('electron-squirrel-startup')) {
   app.quit();
@@ -62,6 +70,7 @@ app.on('activate', () => {
   }
 });
 
+let domain;
 
 ipcMain.on('main', async (event, data) => {
   const logs = [];
@@ -80,7 +89,8 @@ ipcMain.on('main', async (event, data) => {
   try {
     logToTextarea('[INFO] Process started...');
     event.sender.send("run");
-    await mainProccess(logToTextarea,proggress, data)
+    await mainProccess(logToTextarea, proggress, data)
+    domain = data.dom
     logToTextarea('[INFO] Process completed successfully.');
     event.sender.send("force");
   } catch (error) {
@@ -109,4 +119,37 @@ ipcMain.on('app_version', (event) => {
 
 ipcMain.on('restart_app', () => {
   autoUpdater.quitAndInstall();
+});
+
+ipcMain.on('save', (event) => {
+  const options = {
+    title: `Save a Permalink File from domain ${domain}`,
+    defaultPath: `${domain}.txt`,
+    filters: [{
+      name: '.txt',
+      extensions: ['txt']
+    }]
+  };
+
+  dialog.showSaveDialog(options).then(result => {
+    if (!result.canceled) {
+      const content = link.join("\n")
+      fs.writeFileSync(result.filePath, content);
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'Alert',
+        message: 'Successfully saved the text file',
+        buttons: ['OK']
+      });
+    } else {
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'Alert',
+        message: 'Failed to save the text file',
+        buttons: ['OK']
+      });
+    }
+  }).catch(err => {
+    console.error(err);
+  });
 });

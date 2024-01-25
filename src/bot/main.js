@@ -1,10 +1,13 @@
 const puppeteer = require('puppeteer-extra');
-const { executablePath } = require('puppeteer')
+const {
+    executablePath
+} = require('puppeteer')
 const stealthPlugin = require('puppeteer-extra-plugin-stealth')
 puppeteer.use(stealthPlugin())
 const fs = require('fs');
 const path = require('path')
 let stops = false
+let link = [];
 
 const mainProccess = async (logToTextArea, proggress, data) => {
     const baseURL = 'https://chat.openai.com/';
@@ -47,6 +50,11 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 waitUntil: ['domcontentloaded', 'networkidle2'],
                 timeout: 120000,
             })
+
+            if (await page.url().includes("https://chat.openai.com/auth/login")) {
+                logToTextArea("[WARNING] Something error with Cookies")
+                await browser.close()
+            }
 
             logToTextArea('[INFO] Done Load Cookies\n')
         } catch (error) {
@@ -108,46 +116,10 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await delay(3)
 
         logToTextArea('[INFO] Enter the Google Image Page')
-        const googleImage = 'https://www.google.com/imghp?hl=en&ogbl'
         const page3 = await browser.newPage();
-        await page3.goto(googleImage, {
-            waitUntil: ['domcontentloaded', 'networkidle2'],
-            timeout: 120000,
-        })
 
-        await page3.waitForSelector('[name="q"]')
-        await page3.type('[name="q"]', keyword)
-
-        await page3.keyboard.press('Enter')
-
-        await delay(3)
-
-        async function getRandomImageURL() {
-            let imageURL = null;
-
-            while (imageURL == null) {
-                logToTextArea('[INFO] Search for Random Images in Google Image');
-                await page3.waitForSelector('.rg_i');
-                const imageSelector = await page3.$$('.rg_i');
-                const randomImageIndex = Math.floor(Math.random() * imageSelector.length);
-                const randomImage = imageSelector[randomImageIndex];
-
-                await randomImage.click();
-
-                logToTextArea('[INFO] Copy Random Image URL');
-                await delay(10);
-
-                imageURL = await page3.evaluate(() => {
-                    const imageElement = document.querySelector("#Sva75c > div.A8mJGd.NDuZHe.CMiV2d.OGftbe-N7Eqid-H9tDt > div.dFMRD > div.AQyBn > div.tvh9oe.BIB1wf.hVa2Fd > c-wiz > div > div > div > div > div.v6bUne > div.p7sI2.PUxBg > a > img.sFlh5c.pT0Scc.iPVvYb");
-                    return imageElement ? imageElement.src : null;
-                });
-            }
-
-            return imageURL;
-        }
-
-        const imageURL = await getRandomImageURL();
-
+        const imageURL = await getImages(page3, data, keyword);
+        
         const tagIMG = await page3.evaluate((imageURL) => {
             const imageTag = `<img class="aligncenter" src="${imageURL}"/>`;
             return imageTag;
@@ -161,7 +133,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         const buttonText = await page2.$('#content-html')
         await buttonText.click()
-
+        
         await page2.waitForSelector('#content')
 
         await delay(2)
@@ -237,7 +209,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         await page2.bringToFront()
         await page.bringToFront()
-
+        
         logToTextArea('[INFO] Create a Meta Description in ChatGPT')
 
         // write chtgpt
@@ -274,7 +246,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         await page.bringToFront()
         await page2.bringToFront()
-
+        
         logToTextArea('[INFO] Paste Tags from ChatGPT in Wordpress')
         const tagsWP = await page2.$('#new-tag-post_tag')
         await page2.evaluate(e => e.click(), tagsWP)
@@ -287,7 +259,12 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await page2.evaluate(() => {
             document.querySelector("#post_tag > div > div.ajaxtag.hide-if-no-js > input.button.tagadd").click()
         })
-
+        
+        const sampleLink = await page2.$('#sample-permalink > a')
+        const permaLink = await page2.evaluate(e => e.getAttribute('href'), sampleLink)
+        
+        link.push(permaLink)
+    
         await delay(5)
 
         logToTextArea('[INFO] Click Save Post Button')
@@ -330,6 +307,77 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             }
 
             await delay(3)
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    const getImages = async (page, data, keyword) => {
+        try {
+            if (data.googleImage) {
+                await page.goto("https://www.google.com/imghp?hl=en&ogbl", {
+                    waitUntil: ['domcontentloaded', 'networkidle2'],
+                    timeout: 120000,
+                })
+
+                await page.waitForSelector('[name="q"]', {
+                    timeout: 120000
+                })
+                await page.type('[name="q"]', keyword)
+
+                await page.keyboard.press('Enter')
+
+                await delay(3)
+
+                let imageURL = null;
+
+                while (imageURL == null) {
+                    logToTextArea('[INFO] Search for Random Images in Google Image');
+                    await page.waitForSelector('.rg_i');
+                    const imageSelector = await page.$$('.rg_i');
+                    const randomImageIndex = Math.floor(Math.random() * imageSelector.length);
+                    const randomImage = imageSelector[randomImageIndex];
+
+                    await randomImage.click();
+
+                    logToTextArea('[INFO] Copy Random Image URL');
+                    await delay(10);
+
+                    imageURL = await page.evaluate(() => {
+                        const imageElement = document.querySelector("#Sva75c > div.A8mJGd.NDuZHe.CMiV2d.OGftbe-N7Eqid-H9tDt > div.dFMRD > div.AQyBn > div.tvh9oe.BIB1wf.hVa2Fd > c-wiz > div > div > div > div > div.v6bUne > div.p7sI2.PUxBg > a > img.sFlh5c.pT0Scc.iPVvYb");
+                        return imageElement ? imageElement.src : null;
+                    });
+                }
+
+                return imageURL;
+
+            } else if (data.unsplash) {
+                await page.goto("https://unsplash.com/", {
+                    waitUntil: ['domcontentloaded', 'networkidle2'],
+                    timeout: 120000,
+                })
+
+                await page.waitForSelector('input[name="searchKeyword"]', {
+                    timeout: 120000
+                })
+
+                const search = await page.$$('input[name="searchKeyword"]')
+                await search[0].type(keyword)
+                await page.keyboard.press('Enter')
+
+                await delay(3)
+                
+                logToTextArea('[INFO] Search for Random Images in Unsplash Image');
+                await page.waitForSelector('div[data-test="search-photos-route"] > div > div > div > div > div > div > div > div > div > figure > div > div > div > div > a > div > div > img', {
+                    timeout: 120000
+                })
+
+                const images = await page.$$('div[data-test="search-photos-route"] > div > div > div > div > div > div > div > div > div > figure > div > div > div > div > a > div > div > img')
+                const randomImages = Math.floor(Math.random() * images.length)
+
+                return (await page.evaluate(e => e.src, images[randomImages]));
+            }
+
         } catch (error) {
             throw error;
         }
@@ -387,8 +435,9 @@ const mainProccess = async (logToTextArea, proggress, data) => {
     const workFlow = async () => {
         try {
             const files = fs.readFileSync(data.files, 'utf-8');
-            const lines = files.split('\n');
+            const lines = files.split('\n').filter(line => line !== "");
 
+            let j = 0;
             for (let i = 0; i < lines.length; i++) {
                 if (stops) {
                     logToTextArea("Stop Process is done");
@@ -396,7 +445,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 }
 
                 let keyword = lines[i].trim();
-                logToTextArea(`Article Process ${i + 1}`);
+                logToTextArea(`Article Process ${j + 1}`);
                 await coreProccess(keyword);
 
                 const countProgress = parseInt(((i + 1) / lines.length) * 100);
@@ -412,8 +461,10 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     logToTextArea("Stop Process is done");
                     break;
                 }
-            }
+                j++
 
+            }
+            
             await browser.close();
         } catch (error) {
             logToTextArea(error);
@@ -430,6 +481,7 @@ const stopProccess = async () => {
 }
 
 module.exports = {
+    link,
     mainProccess,
     stopProccess
 }
