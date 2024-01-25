@@ -40,7 +40,7 @@
                 Domain Name</label>
               <input type="text"
                 class="text-[#000] w-full text-[12px] h-[43px] px-[14px] py-[2px] rounded-md outline-none"
-                placeholder="ex: google.com" id="domain" required>
+                placeholder="ex: google.com" id="domain" value="firstbisnisku.my.id" required>
             </div>
           </div>
 
@@ -50,10 +50,11 @@
                 Cookies ChatGPT</label>
               <input id="json"
                 class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
-               accept=".json" type="file" required>
+                accept=".json" type="file" required>
             </div>
             <div class="w-full">
-              <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="times">Times New Chat ( minutes )</label>
+              <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="times">Times New Chat (
+                minutes )</label>
               <input type="number"
                 class="text-[#000] w-full text-[12px] h-[43px] px-[14px] py-[2px] rounded-md outline-none"
                 placeholder="3000" value="30" id="times">
@@ -61,17 +62,18 @@
           </div>
           <div class="frame-bot flex flex-col  sm:flex-row gap-2 ">
             <div class="w-full">
-              <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="txt">Input File Keyword</label>
+              <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="txt">Input File
+                Keyword</label>
               <input id="txt"
                 class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
-               accept=".txt" type="file" required>
+                accept=".txt" type="file" required>
             </div>
             <div class="w-full">
               <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="wp">Input
                 File Cookies WordPress</label>
               <input id="wp"
                 class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
-               accept=".json" type="file" required>
+                accept=".json" type="file" required>
             </div>
           </div>
           <!-- <div class="loading h-[14px] rounded-md w-auto bg-white"></div> -->
@@ -82,18 +84,46 @@
             </div>
           </div>
 
-          <button type="button"
-            class="bg-[#121212] text-white h-[57px] w-auto rounded-md font-medium disabled:text-[#666666] disabled:cursor-default disabled:bg-[#b8b8b8]"
-            id="start" disabled>
-            Start
-          </button>
-          <button
-            class="bg-red-700 hidden text-white h-[57px] w-auto rounded-md font-medium disabled:text-[#666666] disabled:bg-[#b8b8b8]"
-            id="stop">
-            Stop
-          </button>
+          <div class="flex gap-3">
+            <button type="button"
+              class="bg-[#121212] text-white h-[57px] w-full rounded-md font-medium disabled:text-[#666666] disabled:cursor-default disabled:bg-[#b8b8b8]"
+              id="start" disabled>
+              Start
+            </button>
+            <button
+              class="bg-red-700 hidden text-white h-[57px] w-full rounded-md font-medium disabled:text-[#666666] disabled:bg-[#b8b8b8]"
+              id="stop">
+              Stop
+            </button>
+            <button id="unduh"
+              class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded hidden items-center">
+              <svg class="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" /></svg>
+              <span>Permalink</span>
+            </button>
+          </div>
     </form>
-    <div class="flex gap-3">
+    <div class="flex flex-row flex-wrap gap-3">
+
+      <div class="flex">
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="googleImage" value="" class="sr-only peer">
+          <div
+            class="w-11 h-6 bg-gray-400 rounded-full peer peer-focus:ring-4 peer-focus:ring-transparent peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all  peer-checked:bg-black">
+          </div>
+          <span class="ms-3 text-sm font-medium text-white ">Google Image</span>
+        </label>
+      </div>
+
+      <div class="flex">
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="unsplash" value="" class="sr-only peer">
+          <div
+            class="w-11 h-6 bg-gray-400 rounded-full peer peer-focus:ring-4 peer-focus:ring-transparent peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all  peer-checked:bg-black">
+          </div>
+          <span class="ms-3 text-sm font-medium text-white ">Unsplash Image</span>
+        </label>
+      </div>
 
       <div class="flex">
         <label class="relative inline-flex items-center cursor-pointer">
