@@ -52,9 +52,13 @@ document.addEventListener('change', function () {
     const cookiesWp = document.getElementById('wp').files[0]?.path;
     if (dom == null || dom == "") {
         start.setAttribute('disabled', true);
-    } else if (files != "" && cookies != null && dom != null && cookiesWp != null && googleImg.checked || unsplash.checked) {
-        start.removeAttribute('disabled');
-    } 
+    } else if (files != "" && cookies != null && dom != null && cookiesWp != null) {
+        if (googleImg.checked || unsplash.checked) {
+            start.removeAttribute('disabled');
+        } else {
+            start.disabled = true
+        }
+    }
 })
 
 start.addEventListener('click', () => {
