@@ -96,6 +96,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await sendChat(keyword, 1)
 
         let articleTitle = await extractText(true)
+        articleTitle = articleTitle.join('').replace(':','')
 
         logToTextArea('[INFO] Enter the Wordpress Page')
         const page2 = await browser.newPage()
@@ -110,7 +111,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         logToTextArea('[INFO] Paste Title in Wordpress')
         await page2.$eval('#title', (textarea, value) => {
-            textarea.value = value.join('')
+            textarea.value = value
         }, articleTitle)
 
         await delay(3)
@@ -215,7 +216,13 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         // write chtgpt
         await sendChat(keyword, 3)
 
-        const metaTag = await extractText(true)
+        let metaTag = await extractText(true)
+
+        console.log('before : ' + metaTag + "\n");
+        
+        metaTag = metaTag.join('').replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
+        
+        console.log('after : ' + metaTag + "\n");
 
         await page.bringToFront()
         await page2.bringToFront()
@@ -272,7 +279,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             titles = await page2.$('#editable-post-name-full')
         const permaLink = await page2.evaluate(e => e.innerHTML, sampleLink),
             links = permaLink.split('<'),
-            ext = links[2].includes('.html') && ".html",
+            ext = links[2].includes('.html') ? ".html" : "",
             title = await page2.evaluate(e => e.innerText, titles)
 
         link.push(links[0] + title + ext)
@@ -290,7 +297,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             if (key === 1) {
                 await writeGPT.type('create one title maximal 60 characters about ' + keyword + ' and remove the quotation mark at the beginning and end of the title');
             } else if (key === 2) {
-                await writeGPT.type('create an article with minimum 600 words from title above without displaying the article title. Article using tag paragraph and add a sub heading for each paragraph. Add ' + keyword + ' as a link in the middle of article sentence of the article result with this url ' + data.dom + ' Write it in a tone that is not typcal of AI');
+                await writeGPT.type('create an article with minimum 600 words from title above without displaying the article title. Article using tag paragraph and add a sub heading for each paragraph. Add ' + keyword + ' as a link in the middle of article sentence of the article result with this url ' + data.dom + ' Write it in a tone that is not typcal of AI and do not include conclusion');
             } else if (key === 3) {
                 await writeGPT.type('Create meta tag 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end');
             } else if (key === 4) {
@@ -419,11 +426,15 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             await newChat.evaluate(e => e.click())
             return;
         } else if (dataArticle.includes('Something went wrong. If this issue persists please contact us through our help center at help.openai.com.')) {
-            logToTextArea('[ERROR] Found error Initiate New Chat !')
+            // logToTextArea('[ERROR] Found error Initiate New Chat !')
+            logToTextArea("[ERROR] Something error with chatGPT")
             await delay(10)
-            const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.bg-black.pt-3\\.5 > div > a')
-            await newChat.evaluate(e => e.click())
-            await sendChat(keyword, key)
+            await browser.close()
+            return;
+
+            // const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.bg-black.pt-3\\.5 > div > a')
+            // await newChat.evaluate(e => e.click())
+            // await sendChat(keyword, key)
         }
     }
 
