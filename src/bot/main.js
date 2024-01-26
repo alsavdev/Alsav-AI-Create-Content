@@ -115,11 +115,11 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         await delay(3)
 
-        logToTextArea('[INFO] Enter the Google Image Page')
+        logToTextArea('[INFO] Enter the Image Page')
         const page3 = await browser.newPage();
 
         const imageURL = await getImages(page3, data, keyword);
-        
+
         const tagIMG = await page3.evaluate((imageURL) => {
             const imageTag = `<img class="aligncenter" src="${imageURL}"/>`;
             return imageTag;
@@ -133,7 +133,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         const buttonText = await page2.$('#content-html')
         await buttonText.click()
-        
+
         await page2.waitForSelector('#content')
 
         await delay(2)
@@ -209,7 +209,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         await page2.bringToFront()
         await page.bringToFront()
-        
+
         logToTextArea('[INFO] Create a Meta Description in ChatGPT')
 
         // write chtgpt
@@ -246,7 +246,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         await page.bringToFront()
         await page2.bringToFront()
-        
+
         logToTextArea('[INFO] Paste Tags from ChatGPT in Wordpress')
         const tagsWP = await page2.$('#new-tag-post_tag')
         await page2.evaluate(e => e.click(), tagsWP)
@@ -259,12 +259,6 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await page2.evaluate(() => {
             document.querySelector("#post_tag > div > div.ajaxtag.hide-if-no-js > input.button.tagadd").click()
         })
-        
-        const sampleLink = await page2.$('#sample-permalink > a')
-        const permaLink = await page2.evaluate(e => e.getAttribute('href'), sampleLink)
-        
-        link.push(permaLink)
-    
         await delay(5)
 
         logToTextArea('[INFO] Click Save Post Button')
@@ -274,8 +268,17 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         })
 
         await delay(15)
+        const sampleLink = await page2.$('#sample-permalink > a'),
+            titles = await page2.$('#editable-post-name-full')
+        const permaLink = await page2.evaluate(e => e.innerHTML, sampleLink),
+            links = permaLink.split('<'),
+            ext = links[2].includes('.html') && ".html",
+            title = await page2.evaluate(e => e.innerText, titles)
 
-        logToTextArea('[INFO] Close Google Image Page and Wordpress Page\n')
+        link.push(links[0] + title + ext)
+        await delay(5)
+
+        logToTextArea('[INFO] Close Image Page and Wordpress Page\n')
         await page3.close()
         await page2.close()
     }
@@ -303,7 +306,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     timeout: 120000
                 })
             } catch (error) {
-                await checkLimit(await extractText(true), key)
+                await checkLimit(await extractText(true), key, keyword)
             }
 
             await delay(3)
@@ -352,21 +355,13 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 return imageURL;
 
             } else if (data.unsplash) {
-                await page.goto("https://unsplash.com/", {
+                await page.goto(`https://unsplash.com/s/photos/${keyword}?license=free&orientation=landscape`, {
                     waitUntil: ['domcontentloaded', 'networkidle2'],
                     timeout: 120000,
                 })
 
-                await page.waitForSelector('input[name="searchKeyword"]', {
-                    timeout: 120000
-                })
-
-                const search = await page.$$('input[name="searchKeyword"]')
-                await search[0].type(keyword)
-                await page.keyboard.press('Enter')
-
                 await delay(3)
-                
+
                 logToTextArea('[INFO] Search for Random Images in Unsplash Image');
                 await page.waitForSelector('div[data-test="search-photos-route"] > div > div > div > div > div > div > div > div > div > figure > div > div > div > div > a > div > div > img', {
                     timeout: 120000
@@ -410,7 +405,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         return article;
     };
 
-    const checkLimit = async (dataArticle, key) => {
+    const checkLimit = async (dataArticle, key, keyword) => {
         if (dataArticle.includes('An error occurred. Either the engine you requested does not exist or there was another issue processing your request. If this issue persists please contact us through our help center at help.openai.com.') || dataArticle.includes('Conversation not found')) {
             stops = true
             logToTextArea("[ERROR] Something error with chatGPT")
@@ -464,7 +459,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 j++
 
             }
-            
+
             await browser.close();
         } catch (error) {
             logToTextArea(error);
