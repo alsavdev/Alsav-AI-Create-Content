@@ -89,8 +89,8 @@ ipcMain.on('main', async (event, data) => {
   try {
     logToTextarea('[INFO] Process started...');
     event.sender.send("run");
-    await mainProccess(logToTextarea, proggress, data)
     domain = data.dom
+    await mainProccess(logToTextarea, proggress, data)
     logToTextarea('[INFO] Process completed successfully.');
     event.sender.send("force");
   } catch (error) {
