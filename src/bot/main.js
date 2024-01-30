@@ -96,7 +96,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await sendChat(keyword, 1)
 
         let articleTitle = await extractText(true)
-        articleTitle = articleTitle.join('').replace(':','')
+        articleTitle = articleTitle.join('').replace(':', '')
 
         logToTextArea('[INFO] Enter the Wordpress Page')
         const page2 = await browser.newPage()
@@ -120,6 +120,9 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         const page3 = await browser.newPage();
 
         const imageURL = await getImages(page3, data, keyword);
+
+        console.log(imageURL);
+        await delay(999999)
 
         const tagIMG = await page3.evaluate((imageURL) => {
             const imageTag = `<img class="aligncenter" src="${imageURL}"/>`;
@@ -219,9 +222,9 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         let metaTag = await extractText(true)
 
         console.log('before : ' + metaTag + "\n");
-        
+
         metaTag = metaTag.join('').replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
-        
+
         console.log('after : ' + metaTag + "\n");
 
         await page.bringToFront()
@@ -322,45 +325,48 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         }
     }
 
+    const handleImageGoogle = async (page, keyword) => {
+        await page.goto("https://www.google.com/imghp?hl=en&ogbl", {
+            waitUntil: ['domcontentloaded', 'networkidle2'],
+            timeout: 120000,
+        })
+
+        await page.waitForSelector('[name="q"]', {
+            timeout: 120000
+        })
+        await page.type('[name="q"]', keyword)
+
+        await page.keyboard.press('Enter')
+
+        await delay(3)
+
+        let imageURL = null;
+
+        while (imageURL == null) {
+            logToTextArea('[INFO] Search for Random Images in Google Image');
+            await page.waitForSelector('.rg_i');
+            const imageSelector = await page.$$('.rg_i');
+            const randomImageIndex = Math.floor(Math.random() * imageSelector.length);
+            const randomImage = imageSelector[randomImageIndex];
+
+            await randomImage.click();
+
+            logToTextArea('[INFO] Copy Random Image URL');
+            await delay(10);
+
+            imageURL = await page.evaluate(() => {
+                const imageElement = document.querySelector("#Sva75c > div.A8mJGd.NDuZHe.CMiV2d.OGftbe-N7Eqid-H9tDt > div.dFMRD > div.AQyBn > div.tvh9oe.BIB1wf.hVa2Fd > c-wiz > div > div > div > div > div.v6bUne > div.p7sI2.PUxBg > a > img.sFlh5c.pT0Scc.iPVvYb");
+                return imageElement ? imageElement.src : null;
+            });
+        }
+
+        return imageURL;
+    }
+
     const getImages = async (page, data, keyword) => {
         try {
             if (data.googleImage) {
-                await page.goto("https://www.google.com/imghp?hl=en&ogbl", {
-                    waitUntil: ['domcontentloaded', 'networkidle2'],
-                    timeout: 120000,
-                })
-
-                await page.waitForSelector('[name="q"]', {
-                    timeout: 120000
-                })
-                await page.type('[name="q"]', keyword)
-
-                await page.keyboard.press('Enter')
-
-                await delay(3)
-
-                let imageURL = null;
-
-                while (imageURL == null) {
-                    logToTextArea('[INFO] Search for Random Images in Google Image');
-                    await page.waitForSelector('.rg_i');
-                    const imageSelector = await page.$$('.rg_i');
-                    const randomImageIndex = Math.floor(Math.random() * imageSelector.length);
-                    const randomImage = imageSelector[randomImageIndex];
-
-                    await randomImage.click();
-
-                    logToTextArea('[INFO] Copy Random Image URL');
-                    await delay(10);
-
-                    imageURL = await page.evaluate(() => {
-                        const imageElement = document.querySelector("#Sva75c > div.A8mJGd.NDuZHe.CMiV2d.OGftbe-N7Eqid-H9tDt > div.dFMRD > div.AQyBn > div.tvh9oe.BIB1wf.hVa2Fd > c-wiz > div > div > div > div > div.v6bUne > div.p7sI2.PUxBg > a > img.sFlh5c.pT0Scc.iPVvYb");
-                        return imageElement ? imageElement.src : null;
-                    });
-                }
-
-                return imageURL;
-
+                return (await handleImageGoogle(page, keyword))
             } else if (data.unsplash) {
                 await page.goto(`https://unsplash.com/s/photos/${keyword}?license=free&orientation=landscape`, {
                     waitUntil: ['domcontentloaded', 'networkidle2'],
@@ -370,14 +376,19 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 await delay(3)
 
                 logToTextArea('[INFO] Search for Random Images in Unsplash Image');
-                await page.waitForSelector('div[data-test="search-photos-route"] > div > div > div > div > div > div > div > div > div > figure > div > div > div > div > a > div > div > img', {
+                await page.waitForSelector('[data-test="page-header-title"]', {
                     timeout: 120000
                 })
 
-                const images = await page.$$('div[data-test="search-photos-route"] > div > div > div > div > div > div > div > div > div > figure > div > div > div > div > a > div > div > img')
-                const randomImages = Math.floor(Math.random() * images.length)
-
-                return (await page.evaluate(e => e.src, images[randomImages]));
+                const nullImage = await page.$('img[alt="No content available"]')
+                if (nullImage) {
+                    logToTextArea("[WARNING] Image not found on unsplash change Mode to google Image")
+                    return (await handleImageGoogle(page, keyword))
+                } else {
+                    const images = await page.$$('div[data-test="search-photos-route"] > div > div > div > div > div > div > div > div > div > figure > div > div > div > div > a > div > div > img')
+                    const randomImages = Math.floor(Math.random() * images.length)
+                    return (await page.evaluate(e => e.src, images[randomImages]));
+                }
             }
 
         } catch (error) {
