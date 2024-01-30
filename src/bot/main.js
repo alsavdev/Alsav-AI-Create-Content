@@ -121,9 +121,6 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         const imageURL = await getImages(page3, data, keyword);
 
-        console.log(imageURL);
-        await delay(999999)
-
         const tagIMG = await page3.evaluate((imageURL) => {
             const imageTag = `<img class="aligncenter" src="${imageURL}"/>`;
             return imageTag;
