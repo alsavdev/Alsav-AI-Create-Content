@@ -21,6 +21,7 @@ const message = document.getElementById('message');
 const restartButton = document.getElementById('restart-button');
 const loaderDownload = document.getElementById('warp-loader')
 const unduh = document.getElementById('unduh')
+const correct = document.getElementById('correct')
 
 document.getElementById('head').style.webkitAppRegion = 'drag'
 
@@ -70,7 +71,8 @@ start.addEventListener('click', () => {
         cookiesWp: cookiesWp.files[0]?.path,
         times: times.value,
         googleImage: googleImg.checked,
-        unsplash: unsplash.checked
+        unsplash: unsplash.checked,
+        sentenceCorrection: correct.checked
     }
 
     progs.innerText = '0%'
@@ -78,7 +80,7 @@ start.addEventListener('click', () => {
     ipcRenderer.send('main', data)
 })
 
-const allElement = [dom, files, cookies, visibleToggle, cookiesWp, times, googleImg, unsplash]
+const allElement = [dom, files, cookies, visibleToggle, cookiesWp, times, googleImg, unsplash, correct]
 
 ipcRenderer.on('run', () => {
     start.classList.add('hidden')

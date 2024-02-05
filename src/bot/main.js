@@ -77,6 +77,11 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 timeout: 120000,
             })
 
+            if (await page.url().includes("wp-login")) {
+                logToTextArea("[WARNING] Something error with Cookies")
+                await browser.close()
+            }
+
             logToTextArea('[INFO] Done Load Cookies WordPress\n')
         } catch (error) {
             logToTextArea(error)
@@ -91,12 +96,15 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         })
 
         logToTextArea(`[INFO] Create a Title About ${keyword} in ChatGPT`)
-
-        // write chtgpt
-        await sendChat(keyword, 1)
-
-        let articleTitle = await extractText(true)
-        articleTitle = articleTitle.join('').replace(':', '')
+        
+        let articleTitle;
+        if (data.sentenceCorrection) {
+            articleTitle = await editText(keyword, 1)
+        } else {
+            await sendChat(keyword, 1)
+            articleTitle = await extractText(true)
+            articleTitle = articleTitle.join('').replace(':', '')
+        }
 
         logToTextArea('[INFO] Enter the Wordpress Page')
         const page2 = await browser.newPage()
@@ -171,8 +179,6 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await page2.click('#content')
         articleTextBody.unshift(tagIMG)
 
-        // console.log(articleTextBody)
-
         logToTextArea('[INFO] Paste Image and Article from ChatGPT in Wordpress Body Text')
         await page2.$eval('#content', (textarea, value) => {
             textarea.value = value.join('');
@@ -213,16 +219,14 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         logToTextArea('[INFO] Create a Meta Description in ChatGPT')
 
-        // write chtgpt
-        await sendChat(keyword, 3)
-
-        let metaTag = await extractText(true)
-
-        console.log('before : ' + metaTag + "\n");
-
-        metaTag = metaTag.join('').replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
-
-        console.log('after : ' + metaTag + "\n");
+        let metaTag; 
+        if (data.sentenceCorrection) {
+            metaTag = await editText(keyword, 3)
+        } else {
+            await sendChat(keyword, 3)
+            metaTag = await extractText(true)    
+            metaTag = metaTag.join('').replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
+        }
 
         await page.bringToFront()
         await page2.bringToFront()
@@ -288,6 +292,48 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         logToTextArea('[INFO] Close Image Page and Wordpress Page\n')
         await page3.close()
         await page2.close()
+    }
+
+    const editText = async (keyword, key) => {
+        let fixTitle = true, max = 1;
+        let textBase;
+
+        while(fixTitle) {
+            max++
+
+            await page.waitForSelector('#prompt-textarea', {
+                waitUntil: ['domcontentloaded', 'networkidle2'],
+                timeout: 120000,
+            })
+
+            await sendChat(keyword, key)
+            let text = await extractText(true)
+            
+            if (key == 1) {
+                text = text.join('').replace(':', '')
+                if ((text.length >= 50) && !(text.length >= 60)) {
+                    textBase = text;
+                    fixTitle = false;
+                    break;
+                }
+            } else if (key == 3) {
+                text = text.join('').replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
+                if ((text.length >= 150) && !(text.length >= 160)) {
+                    textBase = text;
+                    fixTitle = false;
+                    break;
+                }
+            }
+            
+            if (max > 5) {
+                max = 1;
+                const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.bg-black.pt-3\\.5 > div > a')
+                await newChat.evaluate(e => e.click())
+                await delay(3)
+            }
+        }
+        
+        return textBase;
     }
 
     const sendChat = async (keyword, key) => {
