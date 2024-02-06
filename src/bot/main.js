@@ -1,7 +1,5 @@
 const puppeteer = require('puppeteer-extra');
-const {
-    executablePath
-} = require('puppeteer')
+const { executablePath } = require('puppeteer')
 const stealthPlugin = require('puppeteer-extra-plugin-stealth')
 puppeteer.use(stealthPlugin())
 const fs = require('fs');
@@ -96,7 +94,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         })
 
         logToTextArea(`[INFO] Create a Title About ${keyword} in ChatGPT`)
-        
+
         let articleTitle;
         if (data.sentenceCorrection) {
             articleTitle = await editText(keyword, 1)
@@ -163,7 +161,6 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         logToTextArea('[INFO] Create an Article in ChatGPT')
 
-        // write chtgpt
         await sendChat(keyword, 2)
 
         const articleTextBody = await extractText(false)
@@ -202,7 +199,6 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         await delay(2)
 
-        // Menghapus Post Excerpt
         logToTextArea('[INFO] Remove Post Excerpt in Wordpress Meta Description')
         const selectorMeta = "#aioseo-post-settings-meta-description-row > div.aioseo-col.col-xs-12.col-md-9.text-xs-left > div > div.aioseo-html-tags-editor > div.aioseo-editor > div.aioseo-editor-description.ql-container.ql-snow > div.ql-editor > p"
         await page2.waitForSelector(selectorMeta)
@@ -219,12 +215,12 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         logToTextArea('[INFO] Create a Meta Description in ChatGPT')
 
-        let metaTag; 
+        let metaTag;
         if (data.sentenceCorrection) {
             metaTag = await editText(keyword, 3)
         } else {
             await sendChat(keyword, 3)
-            metaTag = await extractText(true)    
+            metaTag = await extractText(true)
             metaTag = metaTag.join('').replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
         }
 
@@ -289,51 +285,60 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         link.push(links[0] + title + ext)
         await delay(5)
 
-        logToTextArea('[INFO] Close Image Page and Wordpress Page\n')
+        logToTextArea('[INFO] Close Image Page and Wordpress Page')
         await page3.close()
         await page2.close()
     }
 
     const editText = async (keyword, key) => {
-        let fixTitle = true, max = 1;
-        let textBase;
+        try {
+            let finish = false
+            let textBase;
 
-        while(fixTitle) {
-            max++
+            while (!finish) {
+                await page.waitForSelector('#prompt-textarea', {
+                    waitUntil: ['domcontentloaded', 'networkidle2'],
+                    timeout: 120000,
+                })
 
-            await page.waitForSelector('#prompt-textarea', {
-                waitUntil: ['domcontentloaded', 'networkidle2'],
-                timeout: 120000,
-            })
+                await sendChat(keyword, key)
+                let text = await extractText(true)
 
-            await sendChat(keyword, key)
-            let text = await extractText(true)
-            
-            if (key == 1) {
-                text = text.join('').replace(':', '')
-                if ((text.length >= 50) && !(text.length >= 60)) {
-                    textBase = text;
-                    fixTitle = false;
-                    break;
-                }
-            } else if (key == 3) {
-                text = text.join('').replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
-                if ((text.length >= 150) && !(text.length >= 160)) {
-                    textBase = text;
-                    fixTitle = false;
-                    break;
+                if (key == 1) {
+                    text = text.join('').split('\n')
+                    console.log(`\nResult Title : \n${text}`);
+                    console.log(`\nResult Title Length: \n${text.length}`);
+                    for (let i = 0; i < text.length; i++) {
+                        const filter = text[i].replace(':','')
+                        if ((filter.length >= 50) && !(filter.length >= 60)) {
+                            console.log(`Hasil Lolos ${filter}`);
+                            console.log(`Hasil Lolos Length ${filter.length}`);
+                            textBase = filter;
+                            finish = true;
+                            break;
+                        }
+                    }
+                } else if (key == 3) {
+                    text = text.join('').split('\n')
+                    console.log(`\nResult Meta : \n${text}`);
+                    console.log(`\nResult Meta Length: \n${text.length}`);
+                    for (let i = 0; i < text.length; i++) {
+                        const filter = text[i].replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
+                        if ((filter.length >= 150) && !(filter.length >= 160)) {
+                            console.log(`Hasil Lolos ${filter}`);
+                            console.log(`Hasil Lolos Length ${filter.length}`);
+                            textBase = filter;
+                            finish = true;
+                            break;
+                        }
+                    }
                 }
             }
-            
-            if (max > 5) {
-                max = 1;
-                const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.bg-black.pt-3\\.5 > div > a')
-                await newChat.evaluate(e => e.click())
-                await delay(3)
-            }
+
+            return textBase;
+        } catch (error) {
+            throw error;
         }
-        
-        return textBase;
     }
 
     const sendChat = async (keyword, key) => {
@@ -341,11 +346,19 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             const writeGPT = await page.$('#prompt-textarea');
 
             if (key === 1) {
-                await writeGPT.type('create one title maximal 60 characters about ' + keyword + ' and remove the quotation mark at the beginning and end of the title');
+                if (data.sentenceCorrection) {
+                    await writeGPT.type(`create 10 title maximal 60 characters about ${keyword} and remove the quotation mark at the beginning and end of the title`);
+                } else {
+                    await writeGPT.type('create one title maximal 60 characters about ' + keyword + ' and remove the quotation mark at the beginning and end of the title');
+                }
             } else if (key === 2) {
                 await writeGPT.type('create an article with minimum 600 words from title above without displaying the article title. Article using tag paragraph and add a sub heading for each paragraph. Add ' + keyword + ' as a link in the middle of article sentence of the article result with this url ' + data.dom + ' Write it in a tone that is not typcal of AI and do not include conclusion');
             } else if (key === 3) {
-                await writeGPT.type('Create meta tag 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end');
+                if (data.sentenceCorrection) {
+                    await writeGPT.type('Create 10 meta tag 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end')
+                } else {
+                    await writeGPT.type('Create meta tag 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end');
+                }
             } else if (key === 4) {
                 await writeGPT.type(`Create 10 consecutive tags using commas from the ${keyword} keyword`)
             }
@@ -480,15 +493,10 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             await newChat.evaluate(e => e.click())
             return;
         } else if (dataArticle.includes('Something went wrong. If this issue persists please contact us through our help center at help.openai.com.')) {
-            // logToTextArea('[ERROR] Found error Initiate New Chat !')
             logToTextArea("[ERROR] Something error with chatGPT")
             await delay(10)
             await browser.close()
             return;
-
-            // const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.bg-black.pt-3\\.5 > div > a')
-            // await newChat.evaluate(e => e.click())
-            // await sendChat(keyword, key)
         }
     }
 
