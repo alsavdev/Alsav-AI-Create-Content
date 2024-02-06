@@ -306,13 +306,9 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
                 if (key == 1) {
                     text = text.join('').split('\n')
-                    console.log(`\nResult Title : \n${text}`);
-                    console.log(`\nResult Title Length: \n${text.length}`);
                     for (let i = 0; i < text.length; i++) {
                         const filter = text[i].replace(':','')
                         if ((filter.length >= 50) && !(filter.length >= 60)) {
-                            console.log(`Hasil Lolos ${filter}`);
-                            console.log(`Hasil Lolos Length ${filter.length}`);
                             textBase = filter;
                             finish = true;
                             break;
@@ -320,13 +316,9 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     }
                 } else if (key == 3) {
                     text = text.join('').split('\n')
-                    console.log(`\nResult Meta : \n${text}`);
-                    console.log(`\nResult Meta Length: \n${text.length}`);
                     for (let i = 0; i < text.length; i++) {
                         const filter = text[i].replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
                         if ((filter.length >= 150) && !(filter.length >= 160)) {
-                            console.log(`Hasil Lolos ${filter}`);
-                            console.log(`Hasil Lolos Length ${filter.length}`);
                             textBase = filter;
                             finish = true;
                             break;
