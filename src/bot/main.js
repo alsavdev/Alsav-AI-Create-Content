@@ -292,7 +292,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
     const editText = async (keyword, key) => {
         try {
-            let finish = false
+            let finish = false, i = 0
             let textBase;
 
             while (!finish) {
@@ -300,8 +300,13 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     waitUntil: ['domcontentloaded', 'networkidle2'],
                     timeout: 120000,
                 })
+                
+                if (key == 3 && i > 0) {
+                    await sendChat(keyword, key, true)
+                } else {
+                    await sendChat(keyword, key, false)
+                }
 
-                await sendChat(keyword, key)
                 let text = await extractText(true)
 
                 if (key == 1) {
@@ -318,13 +323,14 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     text = text.join('').split('\n')
                     for (let i = 0; i < text.length; i++) {
                         const filter = text[i].replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
-                        if ((filter.length >= 150) && !(filter.length >= 160)) {
+                        if ((filter.length >= 140) && !(filter.length >= 160)) {
                             textBase = filter;
                             finish = true;
                             break;
                         }
                     }
                 }
+                i++
             }
 
             return textBase;
@@ -333,7 +339,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         }
     }
 
-    const sendChat = async (keyword, key) => {
+    const sendChat = async (keyword, key, another) => {
         try {
             const writeGPT = await page.$('#prompt-textarea');
 
@@ -347,7 +353,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 await writeGPT.type('create an article with minimum 600 words from title above without displaying the article title. Article using tag paragraph and add a sub heading for each paragraph. Add ' + keyword + ' as a link in the middle of article sentence of the article result with this url ' + data.dom + ' Write it in a tone that is not typcal of AI and do not include conclusion');
             } else if (key === 3) {
                 if (data.sentenceCorrection) {
-                    await writeGPT.type('Create 10 meta tag 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end')
+                    await writeGPT.type(`${another ? 'Create another 10 meta descriptions from the ones already created with long words but not the html code version and add the title at the top first and remove the quotes at the beginning and end.' : ' Create 10 meta description with long word but not the html code version and add the title at the top first and remove the quotes at the beginning and end.'}`)
                 } else {
                     await writeGPT.type('Create meta tag 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end');
                 }
