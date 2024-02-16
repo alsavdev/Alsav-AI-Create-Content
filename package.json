@@ -1,7 +1,7 @@
 {
   "name": "article-build",
   "productName": "Article Build",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "My Electron application description",
   "main": "src/index.js",
   "scripts": {

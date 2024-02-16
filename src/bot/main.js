@@ -34,16 +34,8 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             const cookiesData = fs.readFileSync(data.cookies, 'utf8')
             const cookies = JSON.parse(cookiesData)
 
-            await page.goto(baseURL, {
-                waitUntil: ['domcontentloaded', 'networkidle2'],
-                timeout: 120000,
-            })
-
             await page.setCookie(...cookies)
 
-            await delay(3)
-
-            //Refresh the page to apply the cookies
             await page.goto(baseURL, {
                 waitUntil: ['domcontentloaded', 'networkidle2'],
                 timeout: 120000,
@@ -166,6 +158,12 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         const articleTextBody = await extractText(false)
         articleTextBody.unshift('<div class="markdown prose w-full break-words dark:prose-invert light" style="text-align: justify;">');
         articleTextBody.unshift('<br>')
+        let lastText = articleTextBody[articleTextBody.length - 1].trim()
+        if (lastText.includes('</p>')) {
+            articleTextBody[articleTextBody.length - 1] = lastText.replace('</p>', ` Read more about <a href="https://${data.dom}" target="_new" rel="noopener">${keyword}</a></p>`)
+        } else {
+            articleTextBody[articleTextBody.length - 1] += ` Read more about <a href="https://${data.dom}" target="_new" rel="noopener">${keyword}</a>`
+        }
         articleTextBody.push("</div>");
 
         await page.bringToFront()
@@ -217,7 +215,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         let metaTag;
         if (data.sentenceCorrection) {
-            metaTag = await editText(keyword, 3)
+            metaTag = await editText(keyword, 3, articleTitle)
         } else {
             await sendChat(keyword, 3)
             metaTag = await extractText(true)
@@ -266,6 +264,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await page2.evaluate(() => {
             document.querySelector("#post_tag > div > div.ajaxtag.hide-if-no-js > input.button.tagadd").click()
         })
+
         await delay(5)
 
         logToTextArea('[INFO] Click Save Post Button')
@@ -290,9 +289,10 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await page2.close()
     }
 
-    const editText = async (keyword, key) => {
+    const editText = async (keyword, key, title) => {
         try {
-            let finish = false, i = 0
+            let finish = false,
+                i = 0
             let textBase;
 
             while (!finish) {
@@ -300,7 +300,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     waitUntil: ['domcontentloaded', 'networkidle2'],
                     timeout: 120000,
                 })
-                
+
                 if (key == 3 && i > 0) {
                     await sendChat(keyword, key, true)
                 } else {
@@ -312,8 +312,8 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 if (key == 1) {
                     text = text.join('').split('\n')
                     for (let i = 0; i < text.length; i++) {
-                        const filter = text[i].replace(':','')
-                        if ((filter.length >= 50) && !(filter.length >= 60)) {
+                        const filter = text[i].replace(':', '')
+                        if ((filter.length >= 50) && !(filter.length > 60)) {
                             textBase = filter;
                             finish = true;
                             break;
@@ -323,8 +323,9 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     text = text.join('').split('\n')
                     for (let i = 0; i < text.length; i++) {
                         const filter = text[i].replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
-                        if ((filter.length >= 140) && !(filter.length >= 160)) {
-                            textBase = filter;
+                        const rawText = title + " " + filter
+                        if ((rawText.length >= 140) && !(rawText.length > 160)) {
+                            textBase = rawText;
                             finish = true;
                             break;
                         }
@@ -350,10 +351,10 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     await writeGPT.type('create one title maximal 60 characters about ' + keyword + ' and remove the quotation mark at the beginning and end of the title');
                 }
             } else if (key === 2) {
-                await writeGPT.type('create an article with minimum 600 words from title above without displaying the article title. Article using tag paragraph and add a sub heading for each paragraph. Add ' + keyword + ' as a link in the middle of article sentence of the article result with this url ' + data.dom + ' Write it in a tone that is not typcal of AI and do not include conclusion');
+                await writeGPT.type('create an article with minimum 600 words from title above without displaying the article title. Article using tag paragraph and add a sub heading for each paragraph. Write it in a tone that is not typcal of AI and do not include conclusion');
             } else if (key === 3) {
                 if (data.sentenceCorrection) {
-                    await writeGPT.type(`${another ? 'Create another 10 meta descriptions from the ones already created with long words but not the html code version and add the title at the top first and remove the quotes at the beginning and end.' : ' Create 10 meta description with long word but not the html code version and add the title at the top first and remove the quotes at the beginning and end.'}`)
+                    await writeGPT.type(`${another ? 'Create another 10 meta description 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end' : 'Create 10 meta description 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end'}`)
                 } else {
                     await writeGPT.type('Create meta tag 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end');
                 }
@@ -453,7 +454,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
     const extractText = async (notOuter) => {
         let article = [];
 
-        const data = await page.$$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div > main > div.flex.h-full.flex-col > div.flex-1.overflow-hidden > div > div > div > div > div > div > div.relative.flex.w-full.flex-col.lg\\:w-\\[calc\\(100\\%-115px\\)\\].agent-turn > div.flex-col.gap-1.md\\:gap-3 > div.flex.flex-grow.flex-col.max-w-full > div > div');
+        const data = await page.$$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div > main > div.flex.h-full.flex-col > div.flex-1.overflow-hidden > div > div > div > div > div > div > div.relative.flex.w-full.flex-col.agent-turn > div.flex-col.gap-1.md\\:gap-3 > div.flex.flex-grow.flex-col.max-w-full > div > div');
 
         if (data.length > 0) {
             const last = data[data.length - 1];
@@ -487,7 +488,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             logToTextArea(`Limit Reached Wait ${data.times} mnt`)
             await new Promise(resolve => setTimeout(resolve, data.times * 60 * 1000));
             logToTextArea(`Ready after ${data.times} mnt Initiate new chat`)
-            const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.dark.flex-shrink-0.overflow-x-hidden.bg-black > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.bg-black.pt-3\\.5 > div > a')
+            const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.pt-3\\.5 > div > a')
             await newChat.evaluate(e => e.click())
             return;
         } else if (dataArticle.includes('Something went wrong. If this issue persists please contact us through our help center at help.openai.com.')) {
