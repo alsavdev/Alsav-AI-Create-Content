@@ -324,7 +324,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     for (let i = 0; i < text.length; i++) {
                         const filter = text[i].replace("Title:", "").replace("Meta Tag:", "").replace(':', '')
                         const rawText = title + " " + filter
-                        if ((rawText.length >= 140) && !(rawText.length > 160)) {
+                        if ((rawText.length >= 120) && !(rawText.length > 160)) {
                             textBase = rawText;
                             finish = true;
                             break;
@@ -346,7 +346,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
             if (key === 1) {
                 if (data.sentenceCorrection) {
-                    await writeGPT.type(`create 10 title maximal 60 characters about ${keyword} and remove the quotation mark at the beginning and end of the title`);
+                    await writeGPT.type(`create 30 title maximal 60 characters about ${keyword} and remove the quotation mark at the beginning and end of the title`);
                 } else {
                     await writeGPT.type('create one title maximal 60 characters about ' + keyword + ' and remove the quotation mark at the beginning and end of the title');
                 }
@@ -354,9 +354,9 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 await writeGPT.type('create an article with minimum 600 words from title above without displaying the article title. Article using tag paragraph and add a sub heading for each paragraph. Write it in a tone that is not typcal of AI and do not include conclusion');
             } else if (key === 3) {
                 if (data.sentenceCorrection) {
-                    await writeGPT.type(`${another ? 'Create another 10 meta description 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end' : 'Create 10 meta description 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end'}`)
+                    await writeGPT.type(`${another ? `Create another 30 Meta Descriptions of 170 characters about ${keyword} but not the html code version and remove the quotes at the beginning and end` : `Create a 30 Meta Description 170 characters about ${keyword} but not the html code version and remove the quotation marks at the beginning and end`}`)
                 } else {
-                    await writeGPT.type('Create meta tag 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end');
+                    await writeGPT.type('Create Meta Description 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end');
                 }
             } else if (key === 4) {
                 await writeGPT.type(`Create 10 consecutive tags using commas from the ${keyword} keyword`)
