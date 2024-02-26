@@ -1,7 +1,7 @@
 {
-  "name": "article-build",
-  "productName": "Article Build",
-  "version": "1.2.1",
+  "name": "alsav-ai-create-content",
+  "productName": "Alsav AI Create Content",
+  "version": "1.2.2",
   "description": "My Electron application description",
   "main": "src/index.js",
   "scripts": {
@@ -41,18 +41,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/SattyaP/prod-wp"
+    "url": "https://github.com/alsavdev/Alsav-AI-Create-Content"
   },
   "build": {
-    "appId": "Article Build",
-    "productName": "Article Build",
+    "appId": "Alsav AI Create Content",
+    "productName": "Alsav AI Create Content",
     "compression": "maximum",
     "copyright": "Copyright © 2023 Alsav System",
     "publish": [
       {
         "provider": "github",
-        "owner": "SattyaP",
-        "repo": "prod-wp",
+        "owner": "alsavdev",
+        "repo": "Alsav-AI-Create-Content",
         "private": true
       }
     ],
