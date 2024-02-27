@@ -33,13 +33,20 @@
     <d
       class="py-[20px] px-[172px] min-[300px]:px-[25px] sm:px-[50px] md:px-[100px] h-full gap-3 lg:gap-[57px] flex flex-col lg:flex-row justify-center">
       <div class="flex flex-col gap-[10px] w-full basis-full lg:basis-1/2">
-        <div class="w-full flex flex-col gap-2">
+        <div class="w-full flex flex-row gap-2">
           <div class="w-full">
             <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="domain">
               Domain Name</label>
             <input type="text"
               class="text-[#000] w-full text-[12px] h-[43px] px-[14px] py-[2px] rounded-md outline-none"
               placeholder="ex: google.com" id="domain" required>
+          </div>
+          <div class="w-full">
+            <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="limit">
+              Limiters</label>
+            <input type="text"
+              class="text-[#000] w-full text-[12px] h-[43px] px-[14px] py-[2px] rounded-md outline-none"
+              placeholder="2" id="limit" required>
           </div>
         </div>
 
@@ -74,6 +81,14 @@
               class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none"
               accept=".json" type="file" required>
           </div>
+        </div>
+
+        <div class="w-full">
+          <label class="block mb-2 text-sm font-medium text-white dark:text-white" for="pathReport">
+            Input Relative Path ( report files )</label>
+          <input type="text"
+            class="text-[#000] w-full text-[12px] h-[43px] px-[14px] py-[2px] rounded-md outline-none"
+            placeholder="ex: e:documents/data" id="pathReport" required>
         </div>
         <!-- <div class="loading h-[14px] rounded-md w-auto bg-white"></div> -->
 

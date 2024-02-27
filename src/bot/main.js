@@ -284,7 +284,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         link.push(links[0] + title + ext)
         await delay(5)
 
-        logToTextArea('[INFO] Close Image Page and Wordpress Page')
+        logToTextArea('[INFO] Close Image Page and Wordpress Page\n')
         await page3.close()
         await page2.close()
     }
@@ -502,10 +502,12 @@ const mainProccess = async (logToTextArea, proggress, data) => {
     const workFlow = async () => {
         try {
             const files = fs.readFileSync(data.files, 'utf-8');
-            const lines = files.split('\n').filter(line => line !== "");
+            let lines = files.split('\n').filter(line => line.trim() !== "");
+            const fixLines = Math.min(lines.length, data.limit)
 
             let j = 0;
-            for (let i = 0; i < lines.length; i++) {
+            let i = 0 
+            while (i < lines.length && j < fixLines) {
                 if (stops) {
                     logToTextArea("Stop Process is done");
                     break;
@@ -518,18 +520,16 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 const countProgress = parseInt(((i + 1) / lines.length) * 100);
                 proggress(countProgress);
 
-                lines.splice(i, 1);
-                i--;
-
-                const modifiedData = lines.join('\n');
-                fs.writeFileSync(data.files, modifiedData, 'utf-8');
+                i++;
 
                 if (stops) {
                     logToTextArea("Stop Process is done");
                     break;
                 }
                 j++
-
+                
+                lines.splice(0, 1);
+                fs.writeFileSync(data.files, lines.join('\n'), 'utf-8');
             }
 
             await browser.close();
