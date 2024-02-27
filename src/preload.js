@@ -22,6 +22,8 @@ const restartButton = document.getElementById('restart-button');
 const loaderDownload = document.getElementById('warp-loader')
 const unduh = document.getElementById('unduh')
 const correct = document.getElementById('correct')
+const limit = document.getElementById('limit')
+const pathReport = document.getElementById('pathReport')
 
 document.getElementById('head').style.webkitAppRegion = 'drag'
 
@@ -50,15 +52,15 @@ document.addEventListener('change', function () {
     const files = document.getElementById('txt').files[0]?.path;
     const cookies = document.getElementById('json').files[0]?.path;
     const dom = document.getElementById('domain').value;
+    const pathReport = document.getElementById('pathReport').value;
     const cookiesWp = document.getElementById('wp').files[0]?.path;
+
     if (dom == null || dom == "") {
         start.setAttribute('disabled', true);
-    } else if (files != "" && cookies != null && dom != null && cookiesWp != null) {
-        if (googleImg.checked || unsplash.checked) {
-            start.removeAttribute('disabled');
-        } else {
-            start.disabled = true
-        }
+    } else if (files != "" && cookies != null && dom != null && cookiesWp != null && pathReport != "" && (googleImg.checked || unsplash.checked)) {
+        start.disabled = false;
+    } else {
+        start.disabled = true;
     }
 })
 
@@ -72,7 +74,9 @@ start.addEventListener('click', () => {
         times: times.value,
         googleImage: googleImg.checked,
         unsplash: unsplash.checked,
-        sentenceCorrection: correct.checked
+        sentenceCorrection: correct.checked,
+        limit: limit.value,
+        reportPath: pathReport.value,
     }
 
     progs.innerText = '0%'
@@ -80,7 +84,7 @@ start.addEventListener('click', () => {
     ipcRenderer.send('main', data)
 })
 
-const allElement = [dom, files, cookies, visibleToggle, cookiesWp, times, googleImg, unsplash, correct]
+const allElement = [dom, files, cookies, visibleToggle, cookiesWp, times, googleImg, unsplash, correct, limit, pathReport]
 
 ipcRenderer.on('run', () => {
     start.classList.add('hidden')
