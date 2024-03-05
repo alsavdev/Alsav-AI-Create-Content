@@ -22,7 +22,6 @@ const restartButton = document.getElementById('restart-button');
 const loaderDownload = document.getElementById('warp-loader')
 const unduh = document.getElementById('unduh')
 const correct = document.getElementById('correct')
-const limit = document.getElementById('limit')
 const pathReport = document.getElementById('pathReport')
 
 document.getElementById('head').style.webkitAppRegion = 'drag'
@@ -75,7 +74,6 @@ start.addEventListener('click', () => {
         googleImage: googleImg.checked,
         unsplash: unsplash.checked,
         sentenceCorrection: correct.checked,
-        limit: limit.value,
         reportPath: pathReport.value,
     }
 
@@ -84,7 +82,7 @@ start.addEventListener('click', () => {
     ipcRenderer.send('main', data)
 })
 
-const allElement = [dom, files, cookies, visibleToggle, cookiesWp, times, googleImg, unsplash, correct, limit, pathReport]
+const allElement = [dom, files, cookies, visibleToggle, cookiesWp, times, googleImg, unsplash, correct, pathReport]
 
 ipcRenderer.on('run', () => {
     start.classList.add('hidden')
