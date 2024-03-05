@@ -377,7 +377,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     timeout: 120000,
                 })
 
-                if (key == 3 && i > 2) {
+                if ((key == 3 && i > 2) || (key == 1 && i > 2)) {
                     const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.pt-3\\.5 > div > a')
                     await newChat.evaluate(e => e.click())
 
@@ -431,7 +431,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
             if (key === 1) {
                 if (data.sentenceCorrection) {
-                    await writeGPT.type(`create 30 title maximal 60 characters about ${keyword} and remove the quotation mark at the beginning and end of the title`);
+                    await writeGPT.type(`${another ? `create another 30 title maximal 60 characters about ${keyword} and remove the quotation mark at the beginning and end of the title` : `create 30 title maximal 60 characters about ${keyword} and remove the quotation mark at the beginning and end of the title` }`);
                 } else {
                     await writeGPT.type('create one title maximal 60 characters about ' + keyword + ' and remove the quotation mark at the beginning and end of the title');
                 }
