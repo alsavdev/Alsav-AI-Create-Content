@@ -97,7 +97,7 @@ ipcMain.on("main", async (event, data) => {
   }
 });
 
-ipcMain.on("stop", (event) => {
+ipcMain.on("stop", async (event) => {
   const logs = [];
 
   const logToTextarea = (message) => {
@@ -105,8 +105,7 @@ ipcMain.on("stop", (event) => {
     event.sender.send("log", logs.join("\n"));
   };
 
-  stopProccess(logToTextarea);
-  event.sender.send("force");
+  stopProccess(logToTextarea).then(event.sender.send("force"));
 });
 
 ipcMain.on("app_version", (event) => {

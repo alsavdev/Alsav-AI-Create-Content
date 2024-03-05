@@ -48,8 +48,9 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
             logToTextArea('[INFO] Done Load Cookies\n')
         } catch (error) {
-            logToTextArea(error)
-            throw error
+            logToTextArea(`[ERROR] ${error}`)
+            await browser.close()
+            stops = true
         }
     }
 
@@ -80,6 +81,16 @@ const mainProccess = async (logToTextArea, proggress, data) => {
     }
 
     const coreProccess = async (keyword) => {
+        var stat = await checkStat({
+            page: page,
+        });
+        while (stat.code !== 0) {
+            await sleep(500);
+            stat = await checkStat({
+                page: page,
+            });
+        }
+
         await page.waitForSelector('#prompt-textarea', {
             waitUntil: ['domcontentloaded', 'networkidle2'],
             timeout: 120000,
@@ -289,6 +300,71 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await page2.close()
     }
 
+    const sleep = (ms) => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve(true);
+            }, ms);
+        });
+    };
+
+    const checkStat = ({ page }) => {
+        return new Promise(async (resolve, reject) => {
+            var st = setTimeout(() => {
+                resolve({
+                    code: 1,
+                });
+            }, 2000);
+            try {
+                var checkStat = await page.evaluate(() => {
+                    var stat = -1;
+                    if (document.querySelector("html")) {
+                        var html = document.querySelector("html").innerHTML;
+                        html = String(html).toLowerCase();
+                        if (html.indexOf("challenges.cloudflare.com/turnstile") > -1) {
+                            stat = 1;
+                        }
+                    } else {
+                        stat = 2;
+                    }
+
+                    return stat;
+                });
+
+                if (checkStat !== -1) {
+                    try {
+                        var frame = page.frames()[0];
+                        await page.click("iframe");
+                        frame = frame.childFrames()[0];
+                        if (frame) {
+                            await frame.hover('[type="checkbox"]').catch((err) => {});
+                            await frame.click('[type="checkbox"]').catch((err) => {});
+                        }
+                    } catch (err) {}
+                }
+
+                var checkCloudflare = await page.evaluate(() => {
+                    return document?.querySelector("html")?.innerHTML;
+                });
+                const checkIsBypassed = !String(checkCloudflare)?.includes(
+                    "<title>Just a moment...</title>"
+                );
+
+                if (checkIsBypassed) {
+                    clearInterval(st);
+                    resolve({
+                        code: 0,
+                    });
+                }
+            } catch (err) {
+                clearInterval(st);
+                resolve({
+                    code: 1,
+                });
+            }
+        });
+    };
+
     const editText = async (keyword, key, title) => {
         try {
             let finish = false,
@@ -301,8 +377,17 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     timeout: 120000,
                 })
 
-                if (key == 3 && i > 0) {
+                if (key == 3 && i > 2) {
+                    const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.pt-3\\.5 > div > a')
+                    await newChat.evaluate(e => e.click())
+
+                    await page.waitForSelector('#prompt-textarea', {
+                        waitUntil: ['domcontentloaded', 'networkidle2'],
+                        timeout: 120000,
+                    })
+
                     await sendChat(keyword, key, true)
+                    i = 0
                 } else {
                     await sendChat(keyword, key, false)
                 }
@@ -503,13 +588,12 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         try {
             const files = fs.readFileSync(data.files, 'utf-8');
             let lines = files.split('\n').filter(line => line.trim() !== "");
-            const fixLines = Math.min(lines.length, data.limit)
 
             let j = 0;
-            let i = 0 
-            while (i < lines.length && j < fixLines) {
+            for (let i = 0; i < lines.length; i++) {
                 if (stops) {
-                    logToTextArea("Stop Process is done");
+                    logToTextArea("[INFO] Stop Process is done");
+                    stops = false
                     break;
                 }
 
@@ -520,16 +604,19 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 const countProgress = parseInt(((i + 1) / lines.length) * 100);
                 proggress(countProgress);
 
-                i++;
+                lines.splice(i, 1);
+                i--;
+
+                const modifiedData = lines.join('\n');
+                fs.writeFileSync(data.files, modifiedData, 'utf-8');
 
                 if (stops) {
-                    logToTextArea("Stop Process is done");
+                    logToTextArea("[INFO] Stop Process is done");
+                    stops = false
                     break;
                 }
                 j++
-                
-                lines.splice(0, 1);
-                fs.writeFileSync(data.files, lines.join('\n'), 'utf-8');
+
             }
 
             await browser.close();
@@ -543,8 +630,11 @@ const mainProccess = async (logToTextArea, proggress, data) => {
     await workFlow()
 }
 
-const stopProccess = async () => {
-    stops = true
+const stopProccess = (logToTextarea) => {
+    return new Promise((resolve, reject) => {
+        logToTextarea('[INFO] Stop Pressed waiting this proccess until done')
+        resolve(stops = true)
+    });
 }
 
 module.exports = {
