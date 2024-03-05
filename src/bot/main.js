@@ -521,7 +521,8 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 })
 
                 const nullImage = await page.$('img[alt="No content available"]')
-                if (nullImage) {
+                const currentTitle = await page.title()
+                if (nullImage || currentTitle.includes('Page not found')) {
                     logToTextArea("[WARNING] Image not found on unsplash change Mode to google Image")
                     return (await handleImageGoogle(page, keyword))
                 } else {
@@ -573,6 +574,10 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             logToTextArea(`Limit Reached Wait ${data.times} mnt`)
             await new Promise(resolve => setTimeout(resolve, data.times * 60 * 1000));
             logToTextArea(`Ready after ${data.times} mnt Initiate new chat`)
+            const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.pt-3\\.5 > div > a')
+            await newChat.evaluate(e => e.click())
+            return;
+        } else if (dataArticle.includes('An error occurred. Either the engine your requested does not exist or there was another issue proccesing your request. if the issue persists please contact us through our help center at help.openai.com')) {
             const newChat = await page.$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div.flex-shrink-0.overflow-x-hidden.bg-token-sidebar-surface-primary > div > div > div > div > nav > div.flex-col.flex-1.transition-opacity.duration-500.-mr-2.pr-2.overflow-y-auto > div.sticky.left-0.right-0.top-0.z-20.pt-3\\.5 > div > a')
             await newChat.evaluate(e => e.click())
             return;
