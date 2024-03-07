@@ -450,6 +450,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             await delay(2)
 
             await page.click('button[data-testid="send-button"]')
+            await delay(3)
 
             try {
                 await page.waitForSelector('button[data-testid="send-button"]', {
@@ -458,7 +459,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             } catch (error) {
                 await checkLimit(await extractText(true), key, keyword)
             }
-
+            
             await delay(3)
         } catch (error) {
             throw error;
