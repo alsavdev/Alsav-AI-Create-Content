@@ -164,7 +164,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         logToTextArea('[INFO] Create an Article in ChatGPT')
 
-        await sendChat(keyword, 2)
+        await sendChat(keyword, 2, false, articleTitle)
 
         const articleTextBody = await extractText(false)
         articleTextBody.unshift('<div class="markdown prose w-full break-words dark:prose-invert light" style="text-align: justify;">');
@@ -425,7 +425,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         }
     }
 
-    const sendChat = async (keyword, key, another) => {
+    const sendChat = async (keyword, key, another, title) => {
         try {
             const writeGPT = await page.$('#prompt-textarea');
 
@@ -436,10 +436,10 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     await writeGPT.type('create one title maximal 60 characters about ' + keyword + ' and remove the quotation mark at the beginning and end of the title');
                 }
             } else if (key === 2) {
-                await writeGPT.type('create an article with minimum 600 words from title above without displaying the article title. Article using tag paragraph and add a sub heading for each paragraph. Write it in a tone that is not typcal of AI and do not include conclusion');
+                await writeGPT.type(`create an article with minimum 600 words from ${title} without displaying the article title. Article using tag paragraph and add a sub heading for each paragraph. Write it in a tone that is not typcal of AI and do not include conclusion`);
             } else if (key === 3) {
                 if (data.sentenceCorrection) {
-                    await writeGPT.type(`${another ? `Create another 30 Meta Descriptions of 170 characters about ${keyword} but not the html code version and remove the quotes at the beginning and end` : `Create a 30 Meta Description 170 characters about ${keyword} but not the html code version and remove the quotation marks at the beginning and end`}`)
+                    await writeGPT.type(`${another ? `Create another 30 Meta Descriptions of 170 characters about ${keyword} but not the html code version and remove the quotes at the beginning and end` : `Create 30 Meta Description 170 characters about ${keyword} but not the html code version and remove the quotation marks at the beginning and end`}`)
                 } else {
                     await writeGPT.type('Create Meta Description 160 characters but not html code version and add the title above in the first and remove the quotation mark at the beginning and the end');
                 }
