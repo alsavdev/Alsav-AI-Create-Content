@@ -89,7 +89,7 @@ ipcMain.on("main", async (event, data) => {
 
   function save() {
     const filePath = data.reportPath.replace(/\\/g, "/");
-    const filesName = `Data-AI-CreateContent-${new Date()
+    const filesName = `${domain}-${new Date()
       .toLocaleString()
       .replace(/[/:]/g, "-")}`;
     const destinationFile = path.join(filePath, `${filesName}.txt`);
