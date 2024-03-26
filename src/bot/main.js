@@ -135,26 +135,26 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             return imageTag;
         }, imageURL);
 
-
+        
         await page3.bringToFront()
         await page2.bringToFront()
-
+        
         await delay(2)
-
+        
         const buttonText = await page2.$('#content-html')
         await buttonText.click()
-
+        
         await page2.waitForSelector('#content')
-
+        
         await delay(2)
-
+        
         logToTextArea('[INFO] Paste Image URL in Featured Image Wordpress')
         await page2.waitForSelector('#fifu_input_url')
         await page2.click('#fifu_input_url')
         await page2.$eval('#fifu_input_url', (textarea, value) => {
             textarea.value = value
         }, imageURL)
-
+        
         await delay(3)
 
         await page2.bringToFront()
@@ -496,7 +496,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             await delay(10);
 
             imageURL = await page.evaluate(() => {
-                const imageElement = document.querySelector("#Sva75c > div.A8mJGd.NDuZHe.CMiV2d.OGftbe-N7Eqid-H9tDt > div.dFMRD > div.AQyBn > div.tvh9oe.BIB1wf.hVa2Fd > c-wiz > div > div > div > div > div.v6bUne > div.p7sI2.PUxBg > a > img.sFlh5c.pT0Scc.iPVvYb");
+                const imageElement = document.querySelector("#Sva75c > div.A8mJGd.NDuZHe.OGftbe-N7Eqid-H9tDt > div.LrPjRb > div.AQyBn > div.tvh9oe.BIB1wf > c-wiz > div > div > div > div > div.v6bUne > div.p7sI2.PUxBg > a > img.sFlh5c.pT0Scc.iPVvYb");
                 return imageElement ? imageElement.src : null;
             });
         }
