@@ -391,7 +391,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 } else {
                     await sendChat(keyword, key, false)
                 }
-
+                
                 let text = await extractText(true)
 
                 if (key == 1) {
@@ -399,6 +399,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     for (let i = 0; i < text.length; i++) {
                         const filter = text[i].replace(':', '')
                         if ((filter.length >= 50) && !(filter.length > 60)) {
+                            console.log(filter.length);
                             textBase = filter;
                             finish = true;
                             break;
@@ -416,6 +417,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                         }
                     }
                 }
+
                 i++
             }
 
@@ -541,7 +543,8 @@ const mainProccess = async (logToTextArea, proggress, data) => {
     const extractText = async (notOuter) => {
         let article = [];
 
-        const data = await page.$$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div > main > div.flex.h-full.flex-col > div.flex-1.overflow-hidden > div > div > div > div > div > div > div.relative.flex.w-full.flex-col.agent-turn > div.flex-col.gap-1.md\\:gap-3 > div.flex.flex-grow.flex-col.max-w-full > div > div');
+        // DOCS: This selector before <ol> tag to get the <li> tag or inside the text of element
+        const data = await page.$$('#__next > div.relative.z-0.flex.h-full.w-full.overflow-hidden > div > main > div.flex.h-full.flex-col > div.flex-1.overflow-hidden > div > div > div > div > div > div > div > div.relative.flex.w-full.flex-col.agent-turn > div.flex-col.gap-1.md\\:gap-3 > div.flex.flex-grow.flex-col.max-w-full > div > div');
 
         if (data.length > 0) {
             const last = data[data.length - 1];
