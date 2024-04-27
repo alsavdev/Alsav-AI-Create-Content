@@ -399,7 +399,6 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     for (let i = 0; i < text.length; i++) {
                         const filter = text[i].replace(':', '')
                         if ((filter.length >= 50) && !(filter.length > 60)) {
-                            console.log(filter.length);
                             textBase = filter;
                             finish = true;
                             break;

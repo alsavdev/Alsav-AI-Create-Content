@@ -105,7 +105,8 @@ ipcMain.on("stop", async (event) => {
     event.sender.send("log", logs.join("\n"));
   };
 
-  stopProccess(logToTextarea).then(event.sender.send("force"));
+  await stopProccess(logToTextarea);
+  event.sender.send("force")
 });
 
 ipcMain.on("app_version", (event) => {
