@@ -486,8 +486,8 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         while (imageURL == null) {
             logToTextArea('[INFO] Search for Random Images in Google Image');
-            await page.waitForSelector('.rg_i');
-            const imageSelector = await page.$$('.rg_i');
+            await page.waitForSelector('[data-attrid="images universal"]');
+            const imageSelector = await page.$$('[data-attrid="images universal"]');
             const randomImageIndex = Math.floor(Math.random() * imageSelector.length);
             const randomImage = imageSelector[randomImageIndex];
 
