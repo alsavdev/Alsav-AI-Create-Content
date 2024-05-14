@@ -96,6 +96,15 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             timeout: 120000,
         })
 
+        const popUp = await page.$('img[alt="GPT‑4o NUX"]')
+        if (popUp) {
+            await page.evaluate(() => {
+                document.querySelector("#radix-\\:rq\\: > div.relative.flex.w-full.items-center.justify-center.overflow-hidden.bg-clip-content > div > button").click()
+            })
+        }
+
+        await delay(2)
+
         logToTextArea(`[INFO] Create a Title About ${keyword} in ChatGPT`)
 
         let articleTitle;
