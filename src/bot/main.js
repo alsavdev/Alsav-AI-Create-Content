@@ -33,8 +33,14 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
             const cookiesData = fs.readFileSync(data.cookies, 'utf8')
             const cookies = JSON.parse(cookiesData)
+            
+            if (Array.isArray(cookies) && cookies.length >= 2) {
+                cookies.splice(-2, 2);
+            } else {
+                throw new Error('Cookies data is not an array or has less than 2 elements');
+            }
 
-            await page.setCookie(...cookies)
+            await page.setCookie(...cookies);
 
             await page.goto(baseURL, {
                 waitUntil: ['domcontentloaded', 'networkidle2'],
@@ -102,9 +108,9 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 document.querySelector("#radix-\\:rq\\: > div.relative.flex.w-full.items-center.justify-center.overflow-hidden.bg-clip-content > div > button").click()
             })
         }
-
+        
         await delay(2)
-
+        
         logToTextArea(`[INFO] Create a Title About ${keyword} in ChatGPT`)
 
         let articleTitle;
@@ -144,26 +150,26 @@ const mainProccess = async (logToTextArea, proggress, data) => {
             return imageTag;
         }, imageURL);
 
-        
+
         await page3.bringToFront()
         await page2.bringToFront()
-        
+
         await delay(2)
-        
+
         const buttonText = await page2.$('#content-html')
         await buttonText.click()
-        
+
         await page2.waitForSelector('#content')
-        
+
         await delay(2)
-        
+
         logToTextArea('[INFO] Paste Image URL in Featured Image Wordpress')
         await page2.waitForSelector('#fifu_input_url')
         await page2.click('#fifu_input_url')
         await page2.$eval('#fifu_input_url', (textarea, value) => {
             textarea.value = value
         }, imageURL)
-        
+
         await delay(3)
 
         await page2.bringToFront()
@@ -400,7 +406,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                 } else {
                     await sendChat(keyword, key, false)
                 }
-                
+
                 let text = await extractText(true)
 
                 if (key == 1) {
@@ -459,17 +465,18 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
             await delay(2)
 
-            await page.click('button[data-testid="send-button"]')
+            // Sendchat Selector Priority maintance
+            await page.click('button[class="mb-1 mr-1 flex h-8 w-8 items-center justify-center rounded-full bg-black text-white transition-colors hover:opacity-70 focus-visible:outline-none focus-visible:outline-black disabled:bg-[#D7D7D7] disabled:text-[#f4f4f4] disabled:hover:opacity-100 dark:bg-white dark:text-black dark:focus-visible:outline-white disabled:dark:bg-token-text-quaternary dark:disabled:text-token-main-surface-secondary"]')
             await delay(3)
 
             try {
-                await page.waitForSelector('button[data-testid="send-button"]', {
+                await page.waitForSelector('button[class="mb-1 mr-1 flex h-8 w-8 items-center justify-center rounded-full bg-black text-white transition-colors hover:opacity-70 focus-visible:outline-none focus-visible:outline-black disabled:bg-[#D7D7D7] disabled:text-[#f4f4f4] disabled:hover:opacity-100 dark:bg-white dark:text-black dark:focus-visible:outline-white disabled:dark:bg-token-text-quaternary dark:disabled:text-token-main-surface-secondary"][disabled]', {
                     timeout: 120000
                 })
             } catch (error) {
                 await checkLimit(await extractText(true), key, keyword)
             }
-            
+
             await delay(3)
         } catch (error) {
             throw error;
