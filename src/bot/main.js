@@ -452,7 +452,7 @@ const mainProccess = async (logToTextArea, proggress, data) => {
                     await writeGPT.type('create one title maximal 60 characters about ' + keyword + ' and remove the quotation mark at the beginning and end of the title');
                 }
             } else if (key === 2) {
-                await writeGPT.type(`create an article with minimum 600 words from ${title} without displaying the article title. Article using tag paragraph and add a sub heading for each paragraph. Write it in a tone that is not typcal of AI and do not include conclusion, and make the article with good readability.`);
+                await writeGPT.type(`create an article with good readability with minimum 600 words about ${title} without displaying the article title. Article using tag paragraph and add a sub heading for each paragraph. Write it in a tone that is not typcal of AI and make it not include conclusion and make it not include introduction and make it not html version`);
             } else if (key === 3) {
                 if (data.sentenceCorrection) {
                     await writeGPT.type(`${another ? `Create another 30 Meta Descriptions of 170 characters about ${keyword} but not the html code version and remove the quotes at the beginning and end` : `Create 30 Meta Description 170 characters about ${keyword} but not the html code version and remove the quotation marks at the beginning and end`}`)
