@@ -129,7 +129,11 @@ const mainProccess = async (logToTextArea, proggress, data) => {
 
         await delay(2)
 
-        await page2.waitForSelector('#title')
+        await page2.waitForSelector('#title', {
+            waitUntil: ['domcontentloaded', 'networkidle2'],
+            timeout: 120000,
+        })
+
         await page2.click('#title')
         await delay(2)
 
@@ -182,14 +186,21 @@ const mainProccess = async (logToTextArea, proggress, data) => {
         await sendChat(keyword, 2, false, articleTitle)
 
         const articleTextBody = await extractText(false)
+        
         articleTextBody.unshift('<div class="markdown prose w-full break-words dark:prose-invert light" style="text-align: justify;">');
         articleTextBody.unshift('<br>')
-        let lastText = articleTextBody[articleTextBody.length - 1].trim()
+
+        const regex = /<p[^>]*>(.*?)<\/p>/g;
+        let result = findTextInString(articleTextBody[2], regex);
+        const lastText = result[result.length - 1].trim();
+
         if (lastText.includes('</p>')) {
-            articleTextBody[articleTextBody.length - 1] = lastText.replace('</p>', ` Read more about <a href="https://${data.dom}" target="_new" rel="noopener">${keyword}</a></p>`)
+            result[result.length - 1] = lastText.replace('</p>', ` Read more about <a href="https://${data.dom}" target="_new" rel="noopener">${keyword}</a></p>`)
         } else {
-            articleTextBody[articleTextBody.length - 1] += ` Read more about <a href="https://${data.dom}" target="_new" rel="noopener">${keyword}</a>`
+            result[result.length - 1] += ` Read more about <a href="https://${data.dom}" target="_new" rel="noopener">${keyword}</a>`
         }
+
+        articleTextBody[2] = result.join('');
         articleTextBody.push("</div>");
 
         await page.bringToFront()
@@ -653,6 +664,11 @@ const mainProccess = async (logToTextArea, proggress, data) => {
     await loadCookiesGPT()
     await workFlow()
 }
+
+function findTextInString(htmlString, regex) {
+    const matches = htmlString.match(regex) || [];
+    return matches;
+  }
 
 const stopProccess = (logToTextarea) => {
     return new Promise((resolve, reject) => {
